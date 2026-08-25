@@ -149,9 +149,9 @@
     background: none;
     border: none;
     border-bottom: 2px solid transparent;
-    padding: 12px 8px;
+    padding: 10px 4px;
     font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
+    font-size: 11px;
     font-weight: 400;
     color: var(--text3);
     cursor: pointer;
@@ -160,7 +160,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 5px;
+    gap: 3px;
   }
   .nav-tab.active {
     color: var(--text);
@@ -279,18 +279,21 @@
 
   /* ── 一覧カード：日時のみシンプル ── */
   .visit-card {
+    position: relative;
     background: var(--surface);
     border-bottom: 1px solid var(--border);
-    padding: 12px 18px 12px 36px;
+    padding: 12px 36px;
     cursor: pointer;
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    justify-content: space-between;
     transition: background 0.15s;
   }
   .visit-card:last-child { border-bottom: none; }
   .visit-card:active { background: var(--surface2); }
-  .visit-card-left { display: flex; align-items: center; gap: 12px; }
+  .visit-card-left { grid-column: 2; display: flex; align-items: center; gap: 8px; justify-content: center; }
+  .visit-card-arrow { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); }
+  .visit-card-flag { grid-column: 3; justify-self: start; padding-left: 10px; }
   .visit-time {
     font-family: 'DM Mono', monospace;
     font-size: 15px;
@@ -304,8 +307,7 @@
     font-weight: 400;
     font-family: 'DM Mono', monospace;
   }
-  .visit-card-arrow { color: var(--text3); }
-  .visit-card-arrow svg { width: 14px; height: 14px; }
+  .visit-card-arrow svg { width: 14px; height: 14px; color: var(--text3); }
   .visit-status {
     font-family: 'DM Mono', monospace;
     font-size: 10px;
@@ -367,7 +369,7 @@
     color: var(--text3);
     font-weight: 400;
   }
-  .detail-item-name.checked { color: var(--text); font-weight: 500; }
+  .detail-item-name.checked { color: var(--text); font-weight: 400; }
   .detail-item-note {
     font-size: 14px;
     color: var(--active);
@@ -475,7 +477,49 @@
   select option { background: var(--surface); }
 
   /* ── ITEM ROWS ── */
-  .items-list { display: flex; flex-direction: column; gap: 8px; }
+  .items-list { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 8px; }
+  .item-cell {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 8px 5px;
+    text-align: center;
+    cursor: pointer;
+    position: relative;
+    transition: border-color 0.15s, background 0.15s;
+    min-height: 86px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+  }
+  .item-cell.checked { border-color: var(--active); background: rgba(200,184,154,0.08); }
+  .item-cell:active { background: var(--surface2); }
+  .item-cell .item-icon { width: 20px; height: 20px; color: var(--text3); margin: 0 auto; transition: color 0.15s; }
+  .item-cell.checked .item-icon { color: var(--active); }
+  .item-cell .item-name { font-size: 12px; color: var(--text2); margin-top: 6px; line-height: 1.3; transition: color 0.15s; }
+  .item-cell.checked .item-name { color: var(--text); }
+  .item-cell .cell-check {
+    position: absolute; top: 5px; right: 5px;
+    width: 14px; height: 14px; color: var(--active);
+    opacity: 0; transition: opacity 0.15s;
+  }
+  .item-cell.checked .cell-check { opacity: 1; }
+  .item-cell .cell-note {
+    font-size: 11px; color: var(--active); font-weight: 500;
+    margin-top: 4px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    max-width: 100%; padding: 0 2px;
+  }
+  .item-cell .hint-btn { position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; font-size: 10px; margin-left: 0; }
+  .field-guide {
+    font-size: 12px; font-weight: 500;
+    color: #8a6d0b;
+    background: rgba(232,190,45,0.18);
+    border: 1px solid rgba(200,160,20,0.55);
+    border-radius: 20px;
+    padding: 3px 10px;
+    margin-left: auto;
+    white-space: nowrap;
+  }
   .item-row {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -683,6 +727,23 @@
     z-index: 200;
   }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .hint-btn {
+    flex-shrink: 0;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    background: none;
+    color: var(--text3);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: border-color 0.15s, color 0.15s;
+    line-height: 1;
+    margin-left: 4px;
+  }
+  .hint-btn:active { border-color: var(--accent2); color: var(--accent2); }
 </style>
 </head>
 <body>
@@ -701,19 +762,23 @@
 </div>
 <div class="header-nav">
   <button class="nav-tab active" id="tab-list" onclick="showScreen('screen-list')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:13px;height:13px"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:12px;height:12px"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
     あつめる
   </button>
   <button class="nav-tab" id="tab-export" onclick="showScreen('screen-export')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:13px;height:13px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:12px;height:12px"><rect x="3" y="5" width="18" height="14" rx="2"/><polyline points="3 7 12 13 21 7"/></svg>
     つなぐ
   </button>
   <button class="nav-tab" id="tab-summary" onclick="showScreen('screen-summary')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:13px;height:13px"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:12px;height:12px"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
     一覧
   </button>
+  <button class="nav-tab" id="tab-progress" onclick="showScreen('screen-progress')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:12px;height:12px"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+    進捗
+  </button>
   <button class="nav-tab" id="tab-master" onclick="showScreen('screen-master')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:13px;height:13px"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:12px;height:12px"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     設定
   </button>
 </div>
@@ -731,7 +796,7 @@
     <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px">
       <div class="section-label" style="margin-bottom:0">履歴</div>
       <div style="position:relative">
-        <button id="sort-toggle" onclick="toggleSortMenu(event)" style="background:none;border:none;cursor:pointer;padding:2px 0;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.08em;color:var(--text3);text-transform:uppercase;display:flex;align-items:center;gap:3px">
+        <button id="sort-toggle" onclick="toggleSortMenu(event)" style="background:none;border:none;cursor:pointer;padding:2px 0;font-family:DM Mono,monospace;font-size:10px;letter-spacing:0.08em;color:var(--text3);text-transform:uppercase;display:flex;align-items:center;gap:3px">
           <span id="sort-label">直近順</span>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:10px;height:10px"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
@@ -754,7 +819,7 @@
 </div>
 
 <!-- ══════════════════════════════ FORM SCREEN ══════════════════════════════ -->
-<div id="screen-form" class="screen">
+<div id="screen-form" class="screen" oninput="scheduleDraftSave()">
   <div class="form-header">
     <button class="back-btn" onclick="goBack()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -765,6 +830,22 @@
   </div>
 
   <div class="form-body">
+    <div id="draft-bar" style="display:none;align-items:center;gap:10px;background:rgba(232,190,45,0.14);border:1px solid rgba(200,160,20,0.45);border-radius:2px;padding:8px 12px;margin-bottom:16px">
+      <span style="flex:1;font-size:12px;color:#8a6d0b;font-weight:500">✎ 下書きを復元しました（自動保存中）</span>
+      <button onclick="discardDraft()" style="background:none;border:1px solid rgba(200,160,20,0.55);border-radius:2px;color:#8a6d0b;font-size:12px;padding:4px 10px;cursor:pointer">破棄</button>
+    </div>
+    <!-- 県 -->
+    <div class="field">
+      <div class="field-label">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+        </svg>
+        県
+      </div>
+      <select id="f-pref" onchange="onPrefChange()">
+      </select>
+    </div>
+
     <!-- 施設名 -->
     <div class="field">
       <div class="field-label">
@@ -774,72 +855,104 @@
         </svg>
         施設名
       </div>
-      <select id="f-facility" onchange="showPrevVisit()">
-        <option value="">施設を選択してください</option>
-      </select>
+      <div style="position:relative">
+        <input type="text" id="f-facility" placeholder="施設名を入力" autocomplete="off" oninput="onFacilityInput()" onfocus="onFacilityInput()">
+        <div id="facility-suggest" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:20;background:var(--bg);border:1px solid var(--border);border-top:none;border-radius:0 0 4px 4px;max-height:240px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,0.12)"></div>
+      </div>
       <div id="prev-visit" style="display:none;margin-top:10px"></div>
     </div>
 
-    <!-- 担当者 -->
+    <!-- 今日の仮説・提案 -->
+    <div class="field">
+      <div class="field-label">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.3h6c0-1 .4-1.8 1-2.3A7 7 0 0 0 12 2z"/>
+        </svg>
+        今日の仮説・提案
+      </div>
+      <input type="text" id="f-hypothesis" placeholder="（任意）">
+    </div>
+
+    <!-- PT訪問者 -->
     <div class="field">
       <div class="field-label">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
           <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
         </svg>
-        担当者
+        PT訪問者
       </div>
-      <input type="text" id="f-contact" placeholder="担当者名">
+      <div style="position:relative">
+        <input type="text" id="f-reporter" placeholder="訪問した人" autocomplete="off" oninput="onReporterInput()" onfocus="onReporterInput()">
+        <div id="reporter-suggest" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:20;background:var(--bg);border:1px solid var(--border);border-top:none;border-radius:0 0 4px 4px;max-height:240px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,0.12)"></div>
+      </div>
     </div>
 
-    <!-- メイン作業 -->
+    <!-- 客先担当者 -->
+    <div class="field">
+      <div class="field-label">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+        </svg>
+        客先担当者
+      </div>
+      <div style="position:relative">
+        <input type="text" id="f-contact" placeholder="先方の担当者名" autocomplete="off" oninput="onContactInput()" onfocus="onContactInput()">
+        <div id="contact-suggest" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:20;background:var(--bg);border:1px solid var(--border);border-top:none;border-radius:0 0 4px 4px;max-height:240px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,0.12)"></div>
+      </div>
+    </div>
+
+    <!-- 訪問理由 -->
     <div class="field">
       <div class="field-label">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
           <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
         </svg>
-        メイン作業
+        訪問理由
       </div>
-      <select id="f-main-work">
-        <option value="">選択してください</option>
-        <option value="ベッド修理">ベッド修理</option>
-        <option value="定期点検">定期点検</option>
-        <option value="眠りSCAN設置・指導">眠りSCAN設置・指導</option>
-        <option value="その他">その他</option>
-      </select>
+      <div style="position:relative">
+        <input type="text" id="f-main-work" placeholder="作業を入力または選択" autocomplete="off" oninput="onWorkInput()" onfocus="onWorkInput()">
+        <div id="work-suggest" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:20;background:var(--bg);border:1px solid var(--border);border-top:none;border-radius:0 0 4px 4px;max-height:240px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,0.12)"></div>
+      </div>
+    </div>
+
+    <!-- 提案フラグ -->
+    <div class="field" style="background:rgba(232,190,45,0.10);border:1px solid rgba(200,160,20,0.45);border-radius:4px;padding:12px">
+      <div class="field-label" style="margin-bottom:10px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#8a6d0b" stroke-width="1.5">
+          <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>
+        </svg>
+        つなぐ（PBへのお願い）
+      </div>
+      <div class="flag-list" id="flag-list"></div>
+      <textarea id="f-flag-memo" placeholder="備考" style="margin-top:10px"></textarea>
     </div>
 
     <!-- あつめる -->
-    <div class="field">
-      <div class="field-label">
+    <div class="field" style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:12px">
+      <div class="field-label" style="margin-bottom:10px">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
           <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
         </svg>
-        あつめる（情報）
+        あつめる（情報共有）
+        <span class="field-guide">↓ タップして詳細を入力</span>
       </div>
       <div class="items-list" id="items-list"></div>
     </div>
 
-    <!-- 提案フラグ -->
-    <div class="field">
-      <div class="field-label">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-          <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>
-        </svg>
-        つなぐ（共有事項）
-      </div>
-      <div class="flag-list" id="flag-list"></div>
-      <textarea id="f-flag-memo" placeholder="営業に伝えたいこと（提案ポイント・タイミング・注意点など）" style="margin-top:10px"></textarea>
-    </div>
-
     <!-- メモ -->
     <div class="field">
-      <div class="field-label">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-          <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
-        </svg>
-        メモ
+      <button id="memo-toggle" onclick="expandMemo()" style="background:none;border:none;color:var(--text3);font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;padding:4px 0;display:flex;align-items:center;gap:5px">
+        <span style="font-size:15px;line-height:1">＋</span> メモを追加
+      </button>
+      <div id="memo-body" style="display:none">
+        <div class="field-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+          </svg>
+          メモ
+        </div>
+        <textarea id="f-memo" placeholder="気になった点・申し送り事項など"></textarea>
       </div>
-      <textarea id="f-memo" placeholder="気になった点・申し送り事項など"></textarea>
     </div>
   </div>
 
@@ -875,9 +988,15 @@
 
 <!-- ══════════════════════════════ SUMMARY SCREEN ══════════════════════════════ -->
 <div id="screen-summary" class="screen">
+  <div id="summary-scope" style="display:none;padding:12px 24px 0">
+    <div style="display:flex;border:1px solid var(--border);border-radius:2px;overflow:hidden">
+      <button id="scope-mine" onclick="setScope('mine')" style="flex:1;border:none;padding:9px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer">自分のみ</button>
+      <button id="scope-all" onclick="setScope('all')" style="flex:1;border:none;padding:9px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer">支店全体</button>
+    </div>
+  </div>
   <div style="padding:16px 24px 8px;display:flex;gap:8px;align-items:center">
     <button onclick="shiftMonth(-1)" style="background:none;border:1px solid var(--border);border-radius:2px;padding:8px 14px;cursor:pointer;color:var(--text2);font-size:16px">‹</button>
-    <div id="summary-month-label" style="flex:1;text-align:center;font-family:'DM Mono',monospace;font-size:14px;font-weight:500;color:var(--text)"></div>
+    <div id="summary-month-label" style="flex:1;text-align:center;font-family:DM Mono,monospace;font-size:14px;font-weight:500;color:var(--text)"></div>
     <button onclick="shiftMonth(1)" style="background:none;border:1px solid var(--border);border-radius:2px;padding:8px 14px;cursor:pointer;color:var(--text2);font-size:16px">›</button>
   </div>
   <div id="summary-content" style="padding:8px 24px 40px"></div>
@@ -886,38 +1005,46 @@
 <!-- ══════════════════════════════ MASTER SCREEN ══════════════════════════════ -->
 <div id="screen-master" class="screen">
   <div class="form-body">
-    <!-- 施設管理 -->
+    <!-- 訪問者名 -->
     <div class="field">
       <div class="field-label">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="9" x2="9" y2="21"/></svg>
-        施設を追加
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        訪問者名（メールに自動で記載）
       </div>
-      <div style="display:flex;gap:8px">
-        <input type="text" id="master-input" placeholder="施設名を入力" style="flex:1">
-        <button onclick="addFacility()" style="background:var(--accent);border:none;border-radius:2px;padding:0 18px;color:var(--bg);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;white-space:nowrap">追加</button>
-      </div>
+      <input type="text" id="reporter-input" placeholder="例：山田太郎" oninput="saveReporter()" style="width:100%">
     </div>
+
+    <!-- PB送信先 -->
     <div class="field">
-      <div class="field-label">登録済み施設</div>
-      <div id="master-list"></div>
+      <div class="field-label">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        PB送信先（メールの宛先に自動セット）
+      </div>
+      <textarea id="pb-email-input" placeholder="複数の場合は改行かカンマで区切る&#10;例：&#10;tanaka@example.com&#10;suzuki@example.com" oninput="savePbEmail()" style="width:100%;min-height:80px"></textarea>
     </div>
 
     <div style="height:1px;background:var(--border);margin:8px 0 24px"></div>
 
-    <!-- メイン作業 -->
     <div class="field">
-      <div class="field-label">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-        メイン作業を追加
+      <div class="field-label master-toggle" onclick="toggleMasterList('master')" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between">
+        <span style="display:flex;align-items:center;gap:6px">
+          <svg id="master-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;transition:transform 0.2s"><polyline points="9 18 15 12 9 6"/></svg>
+          登録済み施設 <span id="master-count" style="color:var(--text3);font-family:DM Mono,monospace">(0)</span>
+        </span>
       </div>
-      <div style="display:flex;gap:8px">
-        <input type="text" id="work-input" placeholder="作業名を入力" style="flex:1">
-        <button onclick="addWork()" style="background:var(--accent);border:none;border-radius:2px;padding:0 18px;color:var(--bg);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;white-space:nowrap">追加</button>
-      </div>
+      <div id="master-list" style="display:none;margin-top:8px"></div>
     </div>
+
+    <div style="height:1px;background:var(--border);margin:8px 0 24px"></div>
+
     <div class="field">
-      <div class="field-label">登録済み作業</div>
-      <div id="work-list"></div>
+      <div class="field-label master-toggle" onclick="toggleMasterList('work')" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between">
+        <span style="display:flex;align-items:center;gap:6px">
+          <svg id="work-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;transition:transform 0.2s"><polyline points="9 18 15 12 9 6"/></svg>
+          登録済み作業 <span id="work-count" style="color:var(--text3);font-family:DM Mono,monospace">(0)</span>
+        </span>
+      </div>
+      <div id="work-list" style="display:none;margin-top:8px"></div>
     </div>
 
     <div style="height:1px;background:var(--border);margin:8px 0 24px"></div>
@@ -928,14 +1055,99 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></svg>
         データ管理
       </div>
-      <div style="font-size:12px;color:var(--text2);margin-bottom:10px;line-height:1.6">全件をCSVで出力。Excelで開ける表形式で、バックアップや引き継ぎ用に。</div>
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:2px;padding:12px 14px;font-size:12px;color:var(--text2);margin-bottom:12px">
-        <span style="color:var(--text3)">記録件数</span>　<span id="export-stats" style="font-family:'DM Mono',monospace;color:var(--text);font-weight:500">—</span>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:10px;line-height:1.6">Excel形式で出力。枠線・色付きで、開いたまま提出できます。</div>
+
+      <label id="export-scope-wrap" style="display:none;align-items:center;gap:8px;font-size:13px;color:var(--text2);margin-bottom:10px;cursor:pointer"><input type="checkbox" id="export-include-imported" onchange="renderExportStats()" style="width:16px;height:16px;accent-color:var(--accent)"> 取り込みデータを含める（支店全体）</label>
+      <!-- タブ -->
+      <div style="display:flex;border:1px solid var(--border);border-radius:2px;margin-bottom:10px;overflow:hidden">
+        <button id="export-tab-month" onclick="setExportTab('month')" style="flex:1;background:var(--accent);color:var(--bg);border:none;padding:10px;font-family:DM Sans,sans-serif;font-size:13px;font-weight:500;cursor:pointer">月別</button>
+        <button id="export-tab-all" onclick="setExportTab('all')" style="flex:1;background:none;color:var(--text2);border:none;padding:10px;font-family:DM Sans,sans-serif;font-size:13px;font-weight:500;cursor:pointer">全件</button>
       </div>
-      <button onclick="exportAllCSV()" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:2px;padding:14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-        全件CSV出力
-      </button>
+
+      <!-- 月別パネル -->
+      <div id="export-panel-month">
+        <select id="export-month-select" onchange="onExportMonthChange()" style="width:100%;margin-bottom:10px"></select>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:2px;padding:12px 14px;font-size:12px;color:var(--text2);margin-bottom:12px">
+          <span style="color:var(--text3)">この月の記録</span>　<span id="export-month-stats" style="font-family:DM Mono,monospace;color:var(--text);font-weight:500">—</span>
+        </div>
+        <button onclick="exportMonthCSV()" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:2px;padding:14px;color:var(--text);font-family:DM Sans,sans-serif;font-size:14px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          この月をExcel出力
+        </button>
+      </div>
+
+      <!-- 全件パネル -->
+      <div id="export-panel-all" style="display:none">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:2px;padding:12px 14px;font-size:12px;color:var(--text2);margin-bottom:12px">
+          <span style="color:var(--text3)">記録件数</span>　<span id="export-stats" style="font-family:DM Mono,monospace;color:var(--text);font-weight:500">—</span>
+        </div>
+        <button onclick="exportAllCSV()" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:2px;padding:14px;color:var(--text);font-family:DM Sans,sans-serif;font-size:14px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          全件Excel出力
+        </button>
+      </div>
+    </div>
+
+    <!-- 支店データ集約 -->
+    <div class="field">
+      <div class="field-label">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        支店データ集約（JSON）
+      </div>
+      <div style="font-size:12px;color:var(--text3);line-height:1.6;margin-bottom:10px">メンバーが書き出したJSONを取り込むと、集計タブで「支店全体」を表示できます。自分の記録・進捗には混ざりません。</div>
+      <button onclick="exportAllJSON()" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:2px;padding:12px;color:var(--text);font-family:DM Sans,sans-serif;font-size:14px;font-weight:500;cursor:pointer;margin-bottom:8px">自分のデータをJSON書き出し</button>
+      <input type="file" id="import-json-file" accept=".json,application/json" multiple style="display:none" onchange="importJSONFiles(this.files)">
+      <button onclick="document.getElementById('import-json-file').click()" style="width:100%;background:var(--accent);border:none;border-radius:2px;padding:12px;color:var(--bg);font-family:DM Sans,sans-serif;font-size:14px;font-weight:500;cursor:pointer;margin-bottom:8px">JSONを取り込み（複数可）</button>
+      <div id="import-stats" style="font-family:DM Mono,monospace;font-size:12px;color:var(--text2);padding:6px 2px"></div>
+      <button id="import-clear-btn" onclick="clearImported()" style="display:none;width:100%;background:none;border:1px solid var(--danger);border-radius:2px;padding:10px;color:var(--danger);font-family:DM Sans,sans-serif;font-size:13px;cursor:pointer;margin-top:4px">取り込みデータを全削除</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════ PROGRESS SCREEN ══════════════════════════════ -->
+<div id="screen-progress" class="screen">
+  <div class="form-body" style="padding-bottom:60px">
+
+    <!-- 今月の進捗 -->
+    <div class="field">
+      <div class="field-label">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        今月の進捗
+      </div>
+      <div id="progress-this-month"></div>
+    </div>
+
+    <!-- 6ヶ月進捗 -->
+    <div class="field">
+      <div class="field-label">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        6ヶ月の進捗
+      </div>
+      <div id="progress-6months"></div>
+    </div>
+
+    <div style="height:1px;background:var(--border);margin:4px 0 24px"></div>
+
+    <!-- 目標設定 -->
+    <div class="field">
+      <div class="field-label">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+        目標設定（6ヶ月）
+      </div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.6">月間のつなぎ件数の目標を設定します。</div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:2px;padding:16px">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+          <label style="font-size:13px;color:var(--text2);white-space:nowrap">開始月</label>
+          <input type="month" id="goal-start-month2" style="flex:1;font-size:13px;padding:8px 12px">
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
+          <label style="font-size:13px;color:var(--text2);white-space:nowrap">月間目標件数</label>
+          <input type="number" id="goal-monthly-target2" min="1" max="99" placeholder="例：10" style="flex:1;font-size:16px;padding:8px 12px">
+          <span style="font-size:13px;color:var(--text2);white-space:nowrap">件 / 月</span>
+        </div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:14px;font-family:DM Mono,monospace">6ヶ月合計目標：<span id="goal-total-preview2">—</span>件</div>
+        <button onclick="saveGoal2()" style="width:100%;background:var(--accent);border:none;border-radius:2px;padding:12px;color:var(--bg);font-family:DM Sans,sans-serif;font-size:14px;font-weight:500;cursor:pointer">保存</button>
+      </div>
     </div>
   </div>
 </div>
@@ -954,14 +1166,14 @@
       <label for="daily-date" style="display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:2px;padding:16px 18px;cursor:pointer;margin-bottom:10px;position:relative">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:20px;height:20px;color:var(--text2);flex-shrink:0"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         <div style="flex:1">
-          <div style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:2px">対象日</div>
-          <div id="daily-date-label" style="font-size:16px;font-weight:500;color:var(--text);font-family:'DM Mono',monospace">—</div>
+          <div style="font-size:11px;color:var(--text3);font-family:DM Mono,monospace;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:2px">対象日</div>
+          <div id="daily-date-label" style="font-size:16px;font-weight:500;color:var(--text);font-family:DM Mono,monospace">—</div>
         </div>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:18px;height:18px;color:var(--text3)"><polyline points="9 18 15 12 9 6"/></svg>
         <input type="date" id="daily-date" onchange="updateDailyCount()" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%">
       </label>
-      <div id="daily-count" style="font-size:13px;color:var(--text2);margin-bottom:14px;text-align:center;font-family:'DM Mono',monospace;padding:8px;background:var(--surface2);border-radius:2px">—</div>
-      <button onclick="exportDailyEmail()" style="width:100%;background:var(--accent);border:none;border-radius:2px;padding:14px;color:var(--bg);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
+      <div id="daily-count" style="font-size:13px;color:var(--text2);margin-bottom:14px;text-align:center;font-family:DM Mono,monospace;padding:8px;background:var(--surface2);border-radius:2px">—</div>
+      <button onclick="exportDailyEmail()" style="width:100%;background:var(--accent);border:none;border-radius:2px;padding:14px;color:var(--bg);font-family:DM Sans,sans-serif;font-size:14px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
         まとめてメール送信
       </button>
@@ -979,16 +1191,121 @@
   </div>
 </div>
 
+<div class="popup-overlay" id="hint-popup">
+  <div class="popup">
+    <div class="popup-title" id="hint-popup-title">ヒアリングのヒント</div>
+    <div id="hint-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px"></div>
+    <div class="popup-actions">
+      <button class="btn-save" onclick="closeHintPopup()">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<div class="popup-overlay" id="flag-detail-popup">
+  <div class="popup" style="max-height:80vh;display:flex;flex-direction:column">
+    <div class="popup-title" id="flag-detail-title">該当施設一覧</div>
+    <div id="flag-detail-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;overflow-y:auto;flex:1"></div>
+    <div class="popup-actions">
+      <button class="btn-save" onclick="closeFlagDetail()">閉じる</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js" defer></script>
 
 <script>
 // ── DATA ──
+const DEFAULT_HINTS = {
+  round:    [
+    '【事実】病棟のラウンドって、今どのくらいの頻度でされていますか？',
+    '【深掘り】ラウンドのときに、機器の状態チェックはどうやってされていますか？',
+    '【事実】ラウンド中に気になった機器って、記録に残せていますか？',
+    '【深掘り】もし定期的にラウンドサービスを使えるとしたら、一番助かる部分ってどのあたりですか？',
+    '【事実】スタッフから「これ壊れそう」って声が上がるのって、どんな機器が多いですか？',
+    '【深掘り】その声、今はどうやって対応されていますか？',
+  ],
+  survey:   [
+    '【事実】機器の一斉調査って、最後にいつごろされましたか？',
+    '【深掘り】調査のときに一番大変なのってどのあたりですか？',
+    '【事実】調査結果って、記録として残せていますか？',
+    '【深掘り】もし調査を外部にお願いできるとしたら、どんな部分を任せたいですか？',
+    '【事実】修理・更新が必要な機器って、今どのくらい把握できていますか？',
+    '【深掘り】把握できていない場合、どんなリスクを感じていますか？',
+  ],
+  bed:      [
+    '【事実】このベッド、何年目になりますか？',
+    '【深掘り】使っていて、一番困る場面ってどのあたりですか？',
+    '【事実】更新の予定って、もう決まってますか？',
+    '【深掘り】更新のタイミング、どういう流れで決まることが多いですか？',
+    '【事実】他社さんから提案って来てますか？',
+    '【深掘り】どんな内容でしたか？',
+  ],
+  mattress: [
+    '【事実】マットレスって、最後に交換したのいつ頃ですか？',
+    '【深掘り】交換のタイミング、どういう基準で決めることが多いですか？',
+    '【事実】床ずれが起きた患者さん、最近いましたか？',
+    '【深掘り】今はどんな対策をとっていますか？',
+  ],
+  tv:       [
+    '【事実】このTV、何年目になりますか？',
+    '【深掘り】患者さんから、どんな声が一番多いですか？',
+    '【事実】リモコンの紛失や故障って、月に何件くらいありますか？',
+    '【深掘り】対応で一番手間がかかるのってどのあたりですか？',
+  ],
+  comm:     [
+    '【事実】今、見守りシステムって何を使っていますか？',
+    '【深掘り】使っていて、一番不便に感じるのってどのあたりですか？',
+    '【事実】夜間の転倒・転落って、月に何件くらいありますか？',
+    '【深掘り】今はどんな対策をとっていますか？',
+    '【事実】眠りSCANってご存知ですか？',
+    '【深掘り】どんな点が気になりましたか？',
+  ],
+  bath:     [
+    '【事実】介助浴槽って、何年目になりますか？',
+    '【深掘り】入浴介助で、一番大変な場面ってどのあたりですか？',
+    '【事実】浴室機器の故障って、年に何回くらいありますか？',
+    '【深掘り】そのとき、どうやって対応されてますか？',
+  ],
+  beds_cut: [
+    '【事実】病床の削減って、今後の計画に入っていますか？',
+    '【深掘り】どんな方向で話が進んでいますか？',
+    '【事実】削減後に余る機器って、何床分くらい出そうですか？',
+    '【深掘り】その機器、どうする方向で考えていますか？',
+    '【事実】スケジュールって、いつ頃を想定していますか？',
+    '【深掘り】準備で一番大変になりそうなのってどのあたりですか？',
+  ],
+  other:    [
+    '【事実】来年度の設備予算って、もう決まっていますか？',
+    '【深掘り】優先順位が高いのってどのあたりですか？',
+    '【事実】今、一番修理や対応が多い機器ってどれですか？',
+    '【深掘り】どんなトラブルが多いですか？',
+    '【事実】設備の購入って、どなたが決裁されますか？',
+    '【深掘り】決裁までどのくらいの期間がかかることが多いですか？',
+  ],
+};
+
+function getHints(itemId) {
+  const saved = JSON.parse(localStorage.getItem('hints') || '{}');
+  return saved[itemId] || DEFAULT_HINTS[itemId] || [];
+}
+
+function saveHints(itemId, hints) {
+  const saved = JSON.parse(localStorage.getItem('hints') || '{}');
+  saved[itemId] = hints;
+  localStorage.setItem('hints', JSON.stringify(saved));
+}
+
 const ITEMS = [
   { id: 'bed',      label: 'ベッド',     icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 9V6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v3"/><path d="M2 11v5a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5"/><rect x="6" y="9" width="12" height="4" rx="1"/></svg>` },
+  { id: 'round',    label: 'ラウンド',   icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 12a9 9 0 1 0 18 0 9 9 0 0 0-18 0"/><path d="M12 8v4l3 3"/></svg>` },
+  { id: 'survey',   label: '施設環境調査',       icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>` },
   { id: 'mattress', label: 'マットレス', icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="8" width="20" height="8" rx="2"/><line x1="2" y1="12" x2="22" y2="12"/></svg>` },
-  { id: 'tv',       label: 'TV',         icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="7" y1="21" x2="17" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>` },
-  { id: 'comm',     label: '通信機器',   icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1" fill="currentColor"/></svg>` },
+  { id: 'comm',     label: '見守り機器', icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1" fill="currentColor"/></svg>` },
   { id: 'bath',     label: '浴室機器',   icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 12h16v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-6z"/><path d="M4 12V6a2 2 0 0 1 2-2h1v4"/><line x1="8" y1="22" x2="8" y2="24"/><line x1="16" y1="22" x2="16" y2="24"/></svg>` },
+  { id: 'tv',       label: 'TV',         icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="7" y1="21" x2="17" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>` },
+  { id: 'beds_cut', label: '病床削減',   icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 9V6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v3"/><path d="M2 11v5a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5"/><rect x="6" y="9" width="12" height="4" rx="1"/><line x1="4" y1="20" x2="20" y2="4" stroke="currentColor" stroke-width="1.5"/></svg>` },
   { id: 'other',    label: 'その他',     icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>` },
 ];
 
@@ -996,16 +1313,321 @@ const FLAGS = [
   { id: 'propose',  label: '要提案' },
   { id: 'estimate', label: '見積依頼' },
   { id: 'replace',  label: '更新検討' },
-  { id: 'urgent',   label: '至急' },
   { id: 'watch',    label: '要観察' },
 ];
 
 let visits = JSON.parse(localStorage.getItem('visits') || '[]');
+let importedVisits = JSON.parse(localStorage.getItem('importedVisits') || '[]');
+let summaryScope = 'mine';
+function scopedVisits() { return summaryScope === 'all' ? visits.concat(importedVisits) : visits; }
 let facilities = JSON.parse(localStorage.getItem('facilities') || '[]');
 let works = JSON.parse(localStorage.getItem('works') || '["ベッド修理","定期点検","眠りSCAN設置・指導","その他"]');
+let reporterName = localStorage.getItem('reporterName') || '';
+
+// ── 訪問者名 ──
+function saveReporter() {
+  reporterName = document.getElementById('reporter-input').value.trim();
+  localStorage.setItem('reporterName', reporterName);
+}
+
+let pbEmail = localStorage.getItem('pbEmail') || '';
+
+// ── PB送信先 ──
+function savePbEmail() {
+  pbEmail = document.getElementById('pb-email-input').value;
+  localStorage.setItem('pbEmail', pbEmail);
+}
+
+// 登録された複数アドレスを mailto 用のカンマ区切り文字列に整形
+function getPbEmailTo() {
+  if (!pbEmail) return '';
+  return pbEmail
+    .split(/[\n,、，]/)        // 改行・半角/全角カンマ・読点で分割
+    .map(s => s.trim())
+    .filter(s => s)
+    .join(',');
+}
+
+// ── GOAL ──
+function saveGoal2() {
+  const startMonth = document.getElementById('goal-start-month2').value;
+  const target = parseInt(document.getElementById('goal-monthly-target2').value);
+  if (!startMonth || isNaN(target) || target < 1) { showToast('期間と目標件数を入力してください'); return; }
+  const goal = { startMonth, target, savedAt: Date.now() };
+  localStorage.setItem('goal', JSON.stringify(goal));
+  showToast('目標を保存しました');
+  renderProgressScreen();
+}
+
+function renderProgressScreen() {
+  const goal = getGoal();
+
+  // 入力欄に現在値をセット
+  const startEl = document.getElementById('goal-start-month2');
+  const targetEl = document.getElementById('goal-monthly-target2');
+  const previewEl = document.getElementById('goal-total-preview2');
+  if (startEl && goal) { startEl.value = goal.startMonth; }
+  if (targetEl && goal) { targetEl.value = goal.target; }
+  if (previewEl && goal) { previewEl.textContent = goal.target * 6; }
+  if (targetEl) {
+    targetEl.oninput = () => {
+      const v = parseInt(targetEl.value);
+      if (previewEl) previewEl.textContent = isNaN(v) ? '—' : v * 6;
+    };
+  }
+
+  // 今月の進捗
+  const thisMonthEl = document.getElementById('progress-this-month');
+  const sixMonthEl = document.getElementById('progress-6months');
+  if (!goal) {
+    const msg = '<div style="font-size:13px;color:var(--text3);padding:12px 0;font-family:DM Mono,monospace">目標未設定</div>';
+    if (thisMonthEl) thisMonthEl.innerHTML = msg;
+    if (sixMonthEl) sixMonthEl.innerHTML = msg;
+    return;
+  }
+
+  const now = new Date();
+  const currentYM = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+  const count = countTsunagiInMonth(currentYM);
+  const target = goal.target;
+  const pct = Math.min(100, Math.round(count / target * 100));
+  const reached = count >= target;
+
+  if (thisMonthEl) {
+    thisMonthEl.innerHTML = `
+      <div style="background:var(--surface);border:1px solid var(--border);border-left:3px solid ${reached?'var(--active)':'var(--accent2)'};border-radius:2px;padding:16px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px">
+          <div style="font-size:13px;color:var(--text2)">つなぎ件数</div>
+          <div style="font-size:28px;font-weight:500;font-family:DM Mono,monospace;color:${reached?'var(--active)':'var(--text)'}">
+            ${count}<span style="font-size:14px;color:var(--text3);margin-left:4px">/${target}件</span>
+          </div>
+        </div>
+        <div style="height:8px;background:var(--surface2);border-radius:4px;overflow:hidden;margin-bottom:8px">
+          <div style="height:8px;background:${reached?'var(--active)':'var(--accent2)'};width:${pct}%;border-radius:4px;transition:width 0.4s"></div>
+        </div>
+        <div style="font-size:12px;font-family:DM Mono,monospace;color:${reached?'var(--active)':'var(--text3)'}">
+          ${reached ? '今月の目標達成！' : 'あと' + (target - count) + '件'}　${pct}%
+        </div>
+      </div>`;
+  }
+
+  // 6ヶ月進捗
+  const months = getGoalMonths(goal);
+  const endMonth = months[months.length - 1];
+  const rows = months.map(ym => {
+    const c = countTsunagiInMonth(ym);
+    const p = Math.min(100, Math.round(c / goal.target * 100));
+    const isCurrent = ym === currentYM;
+    const r = c >= goal.target;
+    const [, m] = ym.split('-');
+    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+      <div style="width:30px;font-size:13px;font-family:DM Mono,monospace;color:${isCurrent?'var(--text)':'var(--text3)'};font-weight:${isCurrent?'500':'400'}">${parseInt(m)}月</div>
+      <div style="flex:1;height:6px;background:var(--surface2);border-radius:3px;overflow:hidden">
+        <div style="height:6px;background:${r?'var(--active)':isCurrent?'var(--accent2)':'var(--border)'};width:${p}%;border-radius:3px"></div>
+      </div>
+      <div style="width:52px;text-align:right;font-size:13px;font-family:DM Mono,monospace;color:${r?'var(--active)':'var(--text2)'}">
+        ${c}<span style="color:var(--text3);font-size:11px">/${goal.target}</span>
+      </div>
+      ${r ? '<div style="font-size:10px;color:var(--active);white-space:nowrap">✓</div>' : '<div style="width:12px"></div>'}
+    </div>`;
+  }).join('');
+
+  const totalCount = months.reduce((s, ym) => s + countTsunagiInMonth(ym), 0);
+  const totalTarget = goal.target * 6;
+  const totalPct = Math.min(100, Math.round(totalCount / totalTarget * 100));
+
+  if (sixMonthEl) {
+    sixMonthEl.innerHTML = `
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:2px;padding:16px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px">
+          <div style="font-size:11px;font-family:DM Mono,monospace;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em">${months[0].replace('-','/')} 〜 ${endMonth.replace('-','/')}</div>
+          <div style="font-size:13px;font-family:DM Mono,monospace;color:var(--text2)">${totalCount}/${totalTarget}件　${totalPct}%</div>
+        </div>
+        ${rows}
+      </div>`;
+  }
+
+  // 成約・評価サマリー
+  const summaryEl = document.getElementById('progress-summary');
+  if (summaryEl) {
+    const allSent = visits.filter(v => v.dealStatus && v.dealStatus !== 'sent');
+    const contracted = visits.filter(v => v.dealStatus === 'contracted').length;
+    const lost = visits.filter(v => v.dealStatus === 'lost').length;
+    const total = allSent.length;
+    const rate = total > 0 ? Math.round(contracted / total * 100) : 0;
+
+    const rated = visits.filter(v => v.qualityRatings);
+    const avgRating = key => {
+      const vals = rated.map(v => v.qualityRatings?.[key] || 0).filter(v => v > 0);
+      return vals.length > 0 ? (vals.reduce((a,b)=>a+b,0) / vals.length).toFixed(1) : '—';
+    };
+
+    const stars = (val) => {
+      if (val === '—') return '—';
+      const n = Math.round(parseFloat(val));
+      return '★'.repeat(n) + '☆'.repeat(5-n) + ' ' + val;
+    };
+
+    summaryEl.innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">
+        <div style="background:var(--surface2);border-radius:4px;padding:12px;text-align:center">
+          <div style="font-size:10px;color:var(--text3);font-family:DM Mono,monospace;margin-bottom:4px">つなぎ済</div>
+          <div style="font-size:24px;font-weight:500;color:var(--text)">${total}</div>
+        </div>
+        <div style="background:var(--surface2);border-radius:4px;padding:12px;text-align:center">
+          <div style="font-size:10px;color:var(--text3);font-family:DM Mono,monospace;margin-bottom:4px">成約</div>
+          <div style="font-size:24px;font-weight:500;color:#3d6b52">${contracted}</div>
+        </div>
+        <div style="background:var(--surface2);border-radius:4px;padding:12px;text-align:center">
+          <div style="font-size:10px;color:var(--text3);font-family:DM Mono,monospace;margin-bottom:4px">成約率</div>
+          <div style="font-size:24px;font-weight:500;color:${rate>=50?'#3d6b52':'var(--text)'}">${rate}%</div>
+        </div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:2px;padding:14px">
+        <div style="font-size:10px;font-family:DM Mono,monospace;letter-spacing:0.08em;color:var(--text3);text-transform:uppercase;margin-bottom:8px">営業コメントあり</div>
+        <div style="font-size:20px;font-weight:500;color:var(--text);font-family:DM Mono,monospace">${visits.filter(v=>v.salesFeedback).length}<span style="font-size:13px;color:var(--text3)"> 件</span></div>
+        ${[['precision','情報の精度'],['timing','タイミングの良さ'],['useful','提案につながった']].map(([key,label]) =>
+          '<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px">'
+          + '<span style="color:var(--text2)">'+label+'</span>'
+          + '<span style="color:#FAC775;font-family:DM Mono,monospace">'+stars(avgRating(key))+'</span>'
+          + '</div>'
+        ).join('')}
+        <div style="font-size:11px;color:var(--text3);margin-top:8px;font-family:DM Mono,monospace">${rated.length}件の評価データ</div>
+      </div>`;
+  }
+}
+
+function saveGoal() {
+  const startMonth = document.getElementById('goal-start-month').value;
+  const target = parseInt(document.getElementById('goal-monthly-target').value);
+  if (!startMonth || isNaN(target) || target < 1) { showToast('期間と目標件数を入力してください'); return; }
+  const goal = { startMonth, target, savedAt: Date.now() };
+  localStorage.setItem('goal', JSON.stringify(goal));
+  showToast('目標を保存しました');
+  renderGoalCurrent();
+  renderGoalProgressBar();
+}
+
+function getGoal() {
+  return JSON.parse(localStorage.getItem('goal') || 'null');
+}
+
+function getGoalMonths(goal) {
+  // 開始月から6ヶ月分のYYYY-MM配列を返す
+  const months = [];
+  const [y, m] = goal.startMonth.split('-').map(Number);
+  for (let i = 0; i < 6; i++) {
+    const d = new Date(y, m - 1 + i, 1);
+    months.push(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`);
+  }
+  return months;
+}
+
+function countTsunagiInMonth(ym) {
+  // つなぐフラグが1つ以上ついている訪問記録をカウント
+  return visits.filter(v => v.yearMonth === ym && FLAGS.some(f => v.flags?.[f.id])).length;
+}
+
+function renderGoalCurrent() {
+  const el = document.getElementById('goal-current');
+  if (!el) return;
+  const goal = getGoal();
+  if (!goal) { el.innerHTML = ''; return; }
+  const months = getGoalMonths(goal);
+  const now = new Date();
+  const currentYM = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  const endMonth = months[months.length - 1];
+
+  const rows = months.map(ym => {
+    const count = countTsunagiInMonth(ym);
+    const pct = Math.min(100, Math.round(count / goal.target * 100));
+    const isCurrent = ym === currentYM;
+    const [y, m] = ym.split('-');
+    const label = `${parseInt(m)}月`;
+    const reached = count >= goal.target;
+    return `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)">
+      <div style="width:28px;font-size:12px;font-family:DM Mono,monospace;color:${isCurrent?'var(--text)':'var(--text3)'};font-weight:${isCurrent?'500':'400'}">${label}</div>
+      <div style="flex:1;height:6px;background:var(--surface2);border-radius:3px;overflow:hidden">
+        <div style="height:6px;background:${reached?'var(--active)':isCurrent?'var(--accent2)':'var(--border)'};width:${pct}%;border-radius:3px;transition:width 0.3s"></div>
+      </div>
+      <div style="width:48px;text-align:right;font-size:12px;font-family:DM Mono,monospace;color:${reached?'var(--active)':'var(--text2)'}">
+        ${count}<span style="color:var(--text3);font-size:10px">/${goal.target}</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  const totalCount = months.reduce((s, ym) => s + countTsunagiInMonth(ym), 0);
+  const totalTarget = goal.target * 6;
+
+  el.innerHTML = `
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:2px;padding:14px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px">
+        <div style="font-size:11px;font-family:DM Mono,monospace;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em">現在の目標</div>
+        <div style="font-size:11px;font-family:DM Mono,monospace;color:var(--text2)">${months[0].replace('-','/')} 〜 ${endMonth.replace('-','/')}</div>
+      </div>
+      ${rows}
+      <div style="display:flex;justify-content:space-between;padding-top:10px;margin-top:2px">
+        <div style="font-size:12px;color:var(--text2)">6ヶ月合計</div>
+        <div style="font-size:14px;font-weight:500;font-family:DM Mono,monospace;color:${totalCount>=totalTarget?'var(--active)':'var(--text)'}">
+          ${totalCount} <span style="color:var(--text3);font-size:11px">/ ${totalTarget}件</span>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderGoalProgressBar() {
+  const el = document.getElementById('goal-progress-bar');
+  if (!el) return;
+  const goal = getGoal();
+  if (!goal) { el.innerHTML = ''; return; }
+  const now = new Date();
+  const currentYM = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  const months = getGoalMonths(goal);
+  if (!months.includes(currentYM)) { el.innerHTML = ''; return; }
+
+  const count = countTsunagiInMonth(currentYM);
+  const target = goal.target;
+  const pct = Math.min(100, Math.round(count / target * 100));
+  const reached = count >= target;
+  const [, m] = currentYM.split('-');
+
+  el.innerHTML = `
+    <div style="background:var(--surface);border:1px solid var(--border);border-left:3px solid ${reached?'var(--active)':'var(--accent2)'};border-radius:2px;padding:12px 14px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">
+        <div style="font-size:11px;font-family:DM Mono,monospace;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em">${parseInt(m)}月のつなぎ進捗</div>
+        <div style="font-size:16px;font-weight:500;font-family:DM Mono,monospace;color:${reached?'var(--active)':'var(--text)'}">
+          ${count}<span style="font-size:11px;color:var(--text3);margin-left:2px">/${target}件</span>
+        </div>
+      </div>
+      <div style="height:6px;background:var(--surface2);border-radius:3px;overflow:hidden">
+        <div style="height:6px;background:${reached?'var(--active)':'var(--accent2)'};width:${pct}%;border-radius:3px;transition:width 0.4s"></div>
+      </div>
+      <div style="font-size:11px;margin-top:6px;font-family:DM Mono,monospace;color:${reached ? 'var(--active)' : 'var(--text3)'}">${reached ? '今月の目標達成！' : 'あと' + (target - count) + '件'}</div>
+    </div>`;
+}
+
+function renderGoalMonthInput() {
+  const goal = getGoal();
+  const startEl = document.getElementById('goal-start-month');
+  const targetEl = document.getElementById('goal-monthly-target');
+  const previewEl = document.getElementById('goal-total-preview');
+  if (!startEl) return;
+  if (goal) {
+    startEl.value = goal.startMonth;
+    targetEl.value = goal.target;
+    if (previewEl) previewEl.textContent = goal.target * 6;
+  }
+  // プレビュー更新
+  targetEl?.addEventListener('input', () => {
+    const v = parseInt(targetEl.value);
+    if (previewEl) previewEl.textContent = isNaN(v) ? '—' : v * 6;
+  });
+}
 
 function renderMasterList() {
   const el = document.getElementById('master-list');
+  const countEl = document.getElementById('master-count');
+  if (countEl) countEl.textContent = `(${facilities.length})`;
   if (facilities.length === 0) {
     el.innerHTML = `<div style="color:var(--text3);font-size:13px;padding:12px 0">施設が登録されていません</div>`;
     return;
@@ -1019,21 +1641,11 @@ function renderMasterList() {
     </div>`).join('');
 }
 
-function addFacility() {
-  const val = document.getElementById('master-input').value.trim();
-  if (!val) return;
-  if (facilities.includes(val)) { showToast('すでに登録済みです'); return; }
-  facilities.push(val);
-  facilities.sort((a, b) => a.localeCompare(b, 'ja'));
-  localStorage.setItem('facilities', JSON.stringify(facilities));
-  document.getElementById('master-input').value = '';
-  renderMasterList();
-  showToast('追加しました');
-}
-
 function renderWorkList() {
   const el = document.getElementById('work-list');
   if (!el) return;
+  const countEl = document.getElementById('work-count');
+  if (countEl) countEl.textContent = `(${works.length})`;
   if (works.length === 0) {
     el.innerHTML = `<div style="color:var(--text3);font-size:13px;padding:12px 0">作業が登録されていません</div>`;
     return;
@@ -1047,15 +1659,14 @@ function renderWorkList() {
     </div>`).join('');
 }
 
-function addWork() {
-  const val = document.getElementById('work-input').value.trim();
-  if (!val) return;
-  if (works.includes(val)) { showToast('すでに登録済みです'); return; }
-  works.push(val);
-  localStorage.setItem('works', JSON.stringify(works));
-  document.getElementById('work-input').value = '';
-  renderWorkList();
-  showToast('追加しました');
+function toggleMasterList(type) {
+  const listId = type === 'master' ? 'master-list' : 'work-list';
+  const chevId = type === 'master' ? 'master-chevron' : 'work-chevron';
+  const list = document.getElementById(listId);
+  const chev = document.getElementById(chevId);
+  const open = list.style.display !== 'none';
+  list.style.display = open ? 'none' : 'block';
+  if (chev) chev.style.transform = open ? '' : 'rotate(90deg)';
 }
 
 function removeWork(i) {
@@ -1064,30 +1675,138 @@ function removeWork(i) {
   renderWorkList();
 }
 
-function populateWorkSelect() {
-  const sel = document.getElementById('f-main-work');
-  sel.innerHTML = '<option value="">選択してください</option>';
-  works.forEach(w => {
-    const opt = document.createElement('option');
-    opt.value = w; opt.textContent = w;
-    sel.appendChild(opt);
-  });
-}
 function removeFacility(i) {
   facilities.splice(i, 1);
   localStorage.setItem('facilities', JSON.stringify(facilities));
   renderMasterList();
 }
 
-function populateFacilitySelect() {
-  const sel = document.getElementById('f-facility');
-  sel.innerHTML = '<option value="">施設を選択してください</option>';
-  facilities.forEach(f => {
-    const opt = document.createElement('option');
-    opt.value = f; opt.textContent = f;
-    sel.appendChild(opt);
-  });
+// 施設名の正規化（照合専用・前後空白除去＋全角半角統一）
+function normalizeFacility(name) {
+  if (!name) return '';
+  let s = String(name).trim();
+  // 全角英数字→半角
+  s = s.replace(/[Ａ-Ｚａ-ｚ０-９]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xFEE0));
+  // 半角カナ→全角カナ
+  const kanaMap = {
+    'ｶﾞ':'ガ','ｷﾞ':'ギ','ｸﾞ':'グ','ｹﾞ':'ゲ','ｺﾞ':'ゴ','ｻﾞ':'ザ','ｼﾞ':'ジ','ｽﾞ':'ズ','ｾﾞ':'ゼ','ｿﾞ':'ゾ',
+    'ﾀﾞ':'ダ','ﾁﾞ':'ヂ','ﾂﾞ':'ヅ','ﾃﾞ':'デ','ﾄﾞ':'ド','ﾊﾞ':'バ','ﾋﾞ':'ビ','ﾌﾞ':'ブ','ﾍﾞ':'ベ','ﾎﾞ':'ボ',
+    'ﾊﾟ':'パ','ﾋﾟ':'ピ','ﾌﾟ':'プ','ﾍﾟ':'ペ','ﾎﾟ':'ポ',
+    'ｱ':'ア','ｲ':'イ','ｳ':'ウ','ｴ':'エ','ｵ':'オ','ｶ':'カ','ｷ':'キ','ｸ':'ク','ｹ':'ケ','ｺ':'コ',
+    'ｻ':'サ','ｼ':'シ','ｽ':'ス','ｾ':'セ','ｿ':'ソ','ﾀ':'タ','ﾁ':'チ','ﾂ':'ツ','ﾃ':'テ','ﾄ':'ト',
+    'ﾅ':'ナ','ﾆ':'ニ','ﾇ':'ヌ','ﾈ':'ネ','ﾉ':'ノ','ﾊ':'ハ','ﾋ':'ヒ','ﾌ':'フ','ﾍ':'ヘ','ﾎ':'ホ',
+    'ﾏ':'マ','ﾐ':'ミ','ﾑ':'ム','ﾒ':'メ','ﾓ':'モ','ﾔ':'ヤ','ﾕ':'ユ','ﾖ':'ヨ',
+    'ﾗ':'ラ','ﾘ':'リ','ﾙ':'ル','ﾚ':'レ','ﾛ':'ロ','ﾜ':'ワ','ｦ':'ヲ','ﾝ':'ン',
+    'ｧ':'ァ','ｨ':'ィ','ｩ':'ゥ','ｪ':'ェ','ｫ':'ォ','ｬ':'ャ','ｭ':'ュ','ｮ':'ョ','ｯ':'ッ','ｰ':'ー','ﾞ':'゛','ﾟ':'゜'
+  };
+  s = s.replace(/ｶﾞ|ｷﾞ|ｸﾞ|ｹﾞ|ｺﾞ|ｻﾞ|ｼﾞ|ｽﾞ|ｾﾞ|ｿﾞ|ﾀﾞ|ﾁﾞ|ﾂﾞ|ﾃﾞ|ﾄﾞ|ﾊﾞ|ﾋﾞ|ﾌﾞ|ﾍﾞ|ﾎﾞ|ﾊﾟ|ﾋﾟ|ﾌﾟ|ﾍﾟ|ﾎﾟ|[ｱ-ﾝｦｧ-ｯｰﾞﾟ]/g, c => kanaMap[c] || c);
+  // 連続スペースを1つに、全角スペースも半角に
+  s = s.replace(/\u3000/g, ' ').replace(/\s+/g, ' ');
+  return s;
 }
+
+// 既存施設リストの中から、正規化して一致するものを返す（なければ入力値そのまま）
+function resolveFacilityName(input) {
+  const norm = normalizeFacility(input);
+  const match = facilities.find(f => normalizeFacility(f) === norm);
+  return match || input.trim();
+}
+
+// サジェスト表示
+function onFacilityInput() {
+  const input = document.getElementById('f-facility');
+  const box = document.getElementById('facility-suggest');
+  const q = input.value.trim();
+
+  showPrevVisit();
+
+  if (!q) { box.style.display = 'none'; return; }
+
+  const qNorm = normalizeFacility(q);
+  // 完全一致が既にある場合は候補を出さない（選び終わっている状態）
+  const exact = facilities.some(f => normalizeFacility(f) === qNorm);
+
+  const matches = facilities.filter(f => {
+    const fn = normalizeFacility(f);
+    return fn.includes(qNorm) && fn !== qNorm;
+  }).slice(0, 8);
+
+  if (matches.length === 0 || exact) { box.style.display = 'none'; return; }
+
+  box.innerHTML = matches.map(f =>
+    `<div onclick="selectFacility('${f.replace(/'/g, "\\'")}')" style="padding:11px 14px;cursor:pointer;font-size:14px;color:var(--text);border-bottom:1px solid var(--border)" onmouseover="this.style.background='var(--surface)'" onmouseout="this.style.background='transparent'">${f}</div>`
+  ).join('');
+  box.style.display = 'block';
+}
+
+function selectFacility(name) {
+  document.getElementById('f-facility').value = name;
+  document.getElementById('facility-suggest').style.display = 'none';
+  showPrevVisit();
+}
+
+// 過去の訪問記録から、指定フィールドの値の一覧を新しい順・重複なしで取得
+function getHistoryValues(field) {
+  const seen = new Set();
+  const result = [];
+  const sorted = visits.slice().sort((a, b) => (b.dateKey || '').localeCompare(a.dateKey || ''));
+  sorted.forEach(v => {
+    const val = (v[field] || '').trim();
+    if (val && !seen.has(val)) { seen.add(val); result.push(val); }
+  });
+  return result;
+}
+
+// 作業の候補: マスター(works)を先頭に、過去記録を後ろに統合（重複なし）
+function mergeWorkCandidates(history) {
+  const seen = new Set();
+  const result = [];
+  works.forEach(w => { const v = (w || '').trim(); if (v && !seen.has(v)) { seen.add(v); result.push(v); } });
+  history.forEach(v => { if (v && !seen.has(v)) { seen.add(v); result.push(v); } });
+  return result;
+}
+
+// 汎用サジェスト表示
+function showSuggest(inputId, boxId, field, selectFn) {
+  const input = document.getElementById(inputId);
+  const box = document.getElementById(boxId);
+  const q = input.value.trim();
+  let all = getHistoryValues(field);
+  if (field === 'mainWork') all = mergeWorkCandidates(all);
+
+  let candidates;
+  if (!q) {
+    candidates = all.slice(0, 6); // 未入力時は直近6件
+  } else {
+    candidates = all.filter(v => v.includes(q) && v !== q).slice(0, 8);
+  }
+
+  if (candidates.length === 0) { box.style.display = 'none'; return; }
+
+  box.innerHTML = candidates.map(v =>
+    `<div onclick="${selectFn}('${v.replace(/'/g, "\\'")}')" style="padding:11px 14px;cursor:pointer;font-size:14px;color:var(--text);border-bottom:1px solid var(--border)" onmouseover="this.style.background='var(--surface)'" onmouseout="this.style.background='transparent'">${v}</div>`
+  ).join('');
+  box.style.display = 'block';
+}
+
+function onReporterInput() { showSuggest('f-reporter', 'reporter-suggest', 'reporter', 'selectReporter'); }
+function selectReporter(name) {
+  document.getElementById('f-reporter').value = name;
+  document.getElementById('reporter-suggest').style.display = 'none';
+}
+
+function onContactInput() { showSuggest('f-contact', 'contact-suggest', 'contact', 'selectContact'); }
+function selectContact(name) {
+  document.getElementById('f-contact').value = name;
+  document.getElementById('contact-suggest').style.display = 'none';
+}
+
+function onWorkInput() { showSuggest('f-main-work', 'work-suggest', 'mainWork', 'selectWork'); }
+function selectWork(name) {
+  document.getElementById('f-main-work').value = name;
+  document.getElementById('work-suggest').style.display = 'none';
+}
+
 let currentForm = null;
 let currentPopupItemId = null;
 let editingVisitId = null;
@@ -1193,7 +1912,7 @@ function renderList() {
     const cards = vlist.map(v => {
       const activeFlags = FLAGS.filter(f => v.flags?.[f.id]);
       const flagBadges = activeFlags.length > 0
-        ? `<span style="background:var(--active);color:white;font-size:10px;padding:2px 7px;border-radius:2px;font-weight:500;font-family:'DM Mono',monospace">${activeFlags.length === 1 ? activeFlags[0].label : activeFlags.length + '件'}</span>`
+        ? `<span style="background:var(--active);color:white;font-size:10px;padding:2px 7px;border-radius:2px;font-weight:500;font-family:DM Mono,monospace">${activeFlags.length === 1 ? activeFlags[0].label : activeFlags.length + '件'}</span>`
         : '';
       // datetime "12/3 14:30" → "2026.12.03" + (火)
       const dateKey = getDateKey(v);
@@ -1211,8 +1930,8 @@ function renderList() {
         <div class="visit-card-left">
           <span class="visit-time">${dateDisp}</span>
           ${weekday ? `<span class="visit-weekday">${weekday}</span>` : ''}
-          ${flagBadges}
         </div>
+        ${flagBadges ? `<div class="visit-card-flag">${flagBadges}</div>` : ''}
         <div class="visit-card-arrow">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
@@ -1256,6 +1975,92 @@ function clearSearch() {
   renderList();
 }
 
+const PREFS = ['福岡県','佐賀県','長崎県','熊本県','大分県','宮崎県','鹿児島県','沖縄県'];
+function populatePrefSelect(selected) {
+  const sel = document.getElementById('f-pref');
+  const last = localStorage.getItem('lastPref') || '';
+  const ordered = last && PREFS.includes(last)
+    ? [last, ...PREFS.filter(p => p !== last)]
+    : PREFS;
+  sel.innerHTML = '<option value="">県を選択</option>' +
+    ordered.map(p => `<option value="${p}">${p}</option>`).join('');
+  sel.value = selected !== undefined ? (selected || '') : last;
+}
+function onPrefChange() {
+  const v = document.getElementById('f-pref').value;
+  if (v) localStorage.setItem('lastPref', v);
+}
+
+function expandMemo() {
+  document.getElementById('memo-toggle').style.display = 'none';
+  document.getElementById('memo-body').style.display = 'block';
+  document.getElementById('f-memo').focus();
+}
+function setMemoVisible(hasMemo) {
+  document.getElementById('memo-toggle').style.display = hasMemo ? 'none' : 'flex';
+  document.getElementById('memo-body').style.display = hasMemo ? 'block' : 'none';
+}
+
+// ── DRAFT (一時保存) ──
+let draftTimer = null;
+function scheduleDraftSave() {
+  if (editingVisitId) return;
+  clearTimeout(draftTimer);
+  draftTimer = setTimeout(saveDraft, 400);
+}
+function saveDraft() {
+  if (editingVisitId || !currentForm) return;
+  const draft = {
+    pref: document.getElementById('f-pref').value,
+    facility: document.getElementById('f-facility').value,
+    reporter: document.getElementById('f-reporter').value,
+    contact: document.getElementById('f-contact').value,
+    mainWork: document.getElementById('f-main-work').value,
+    memo: document.getElementById('f-memo').value,
+    flagMemo: document.getElementById('f-flag-memo').value,
+    hypothesis: document.getElementById('f-hypothesis').value,
+    items: currentForm.items,
+    flags: currentForm.flags,
+  };
+  const hasContent = draft.facility || draft.contact || draft.memo || draft.flagMemo ||
+    Object.values(draft.items).some(s => s.checked || s.note) ||
+    Object.values(draft.flags).some(v => v);
+  if (hasContent) localStorage.setItem('visitDraft', JSON.stringify(draft));
+  else localStorage.removeItem('visitDraft');
+}
+function clearDraft() {
+  clearTimeout(draftTimer);
+  localStorage.removeItem('visitDraft');
+  document.getElementById('draft-bar').style.display = 'none';
+}
+function discardDraft() {
+  clearDraft();
+  openNewVisit();
+  showToast('下書きを破棄しました');
+}
+function restoreDraft() {
+  const raw = localStorage.getItem('visitDraft');
+  if (!raw) return false;
+  try {
+    const d = JSON.parse(raw);
+    populatePrefSelect(d.pref || '');
+    document.getElementById('f-facility').value = d.facility || '';
+    document.getElementById('f-reporter').value = d.reporter || '';
+    document.getElementById('f-contact').value = d.contact || '';
+    document.getElementById('f-main-work').value = d.mainWork || '';
+    document.getElementById('f-memo').value = d.memo || '';
+    document.getElementById('f-flag-memo').value = d.flagMemo || '';
+    document.getElementById('f-hypothesis').value = d.hypothesis || '';
+    setMemoVisible(!!(d.memo || '').trim());
+    if (d.items) { ITEMS.forEach(i => { if (d.items[i.id]) currentForm.items[i.id] = d.items[i.id]; }); }
+    if (d.flags) { FLAGS.forEach(f => { if (d.flags[f.id] !== undefined) currentForm.flags[f.id] = d.flags[f.id]; }); }
+    renderItems();
+    renderFlags();
+    document.getElementById('draft-bar').style.display = 'flex';
+    return true;
+  } catch (e) { return false; }
+}
+
 // ── NEW VISIT ──
 function openNewVisit() {
   editingVisitId = null;
@@ -1263,17 +2068,26 @@ function openNewVisit() {
     items: Object.fromEntries(ITEMS.map(i => [i.id, { checked: false, note: '' }])),
     flags: Object.fromEntries(FLAGS.map(f => [f.id, false])),
   };
-  populateFacilitySelect();
-  populateWorkSelect();
+  populatePrefSelect();
   document.getElementById('f-facility').value = '';
+  document.getElementById('facility-suggest').style.display = 'none';
   document.getElementById('f-main-work').value = '';
+  document.getElementById('work-suggest').style.display = 'none';
+  const lastReporter = getHistoryValues('reporter')[0] || '';
+  document.getElementById('f-reporter').value = lastReporter;
+  document.getElementById('reporter-suggest').style.display = 'none';
   document.getElementById('f-contact').value = '';
+  document.getElementById('contact-suggest').style.display = 'none';
   document.getElementById('f-memo').value = '';
   document.getElementById('f-flag-memo').value = '';
+  document.getElementById('f-hypothesis').value = '';
   document.getElementById('prev-visit').style.display = 'none';
   document.querySelector('#screen-form .form-title').textContent = '訪問記録';
   renderItems();
   renderFlags();
+  document.getElementById('draft-bar').style.display = 'none';
+  setMemoVisible(false);
+  if (restoreDraft()) showToast('下書きを復元しました');
   showScreen('screen-form');
 }
 
@@ -1289,32 +2103,49 @@ function openEditVisit(id) {
   ITEMS.forEach(i => { if (!currentForm.items[i.id]) currentForm.items[i.id] = { checked: false, note: '' }; });
   FLAGS.forEach(f => { if (currentForm.flags[f.id] === undefined) currentForm.flags[f.id] = false; });
 
-  populateFacilitySelect();
-  populateWorkSelect();
-  // 既存施設がマスターにない場合は選択肢に追加
-  const sel = document.getElementById('f-facility');
-  if (v.facility && ![...sel.options].some(o => o.value === v.facility)) {
-    const opt = document.createElement('option');
-    opt.value = v.facility; opt.textContent = v.facility;
-    sel.appendChild(opt);
-  }
-  const wsel = document.getElementById('f-main-work');
-  if (v.mainWork && ![...wsel.options].some(o => o.value === v.mainWork)) {
-    const opt = document.createElement('option');
-    opt.value = v.mainWork; opt.textContent = v.mainWork;
-    wsel.appendChild(opt);
-  }
-
+  populatePrefSelect(v.pref || '');
   document.getElementById('f-facility').value = v.facility || '';
+  document.getElementById('facility-suggest').style.display = 'none';
   document.getElementById('f-main-work').value = v.mainWork || '';
+  document.getElementById('work-suggest').style.display = 'none';
+  document.getElementById('f-reporter').value = v.reporter || '';
+  document.getElementById('reporter-suggest').style.display = 'none';
   document.getElementById('f-contact').value = v.contact || '';
+  document.getElementById('contact-suggest').style.display = 'none';
   document.getElementById('f-memo').value = v.memo || '';
   document.getElementById('f-flag-memo').value = v.flagMemo || '';
+  document.getElementById('f-hypothesis').value = v.hypothesis || '';
+  setMemoVisible(!!(v.memo || '').trim());
   document.querySelector('#screen-form .form-title').textContent = '訪問記録を編集';
+  document.getElementById('draft-bar').style.display = 'none';
   renderItems();
   renderFlags();
   showPrevVisit();
   showScreen('screen-form');
+}
+
+function updateDealStatus(id, status) {
+  const v = visits.find(v => v.id === id);
+  if (!v) return;
+  v.dealStatus = status;
+  localStorage.setItem('visits', JSON.stringify(visits));
+  openDetail(id);
+}
+
+function updateQuality(id, key, value) {
+  const v = visits.find(v => v.id === id);
+  if (!v) return;
+  if (!v.qualityRatings) v.qualityRatings = {};
+  v.qualityRatings[key] = value;
+  localStorage.setItem('visits', JSON.stringify(visits));
+  openDetail(id);
+}
+
+function updateFeedback(id, text) {
+  const v = visits.find(v => v.id === id);
+  if (!v) return;
+  v.salesFeedback = text;
+  localStorage.setItem('visits', JSON.stringify(visits));
 }
 
 function deleteVisit(id) {
@@ -1338,6 +2169,7 @@ function renderFlags() {
 function toggleFlag(id) {
   currentForm.flags[id] = !currentForm.flags[id];
   renderFlags();
+  scheduleDraftSave();
 }
 
 function renderItems() {
@@ -1345,32 +2177,30 @@ function renderItems() {
   el.innerHTML = ITEMS.map(item => {
     const state = currentForm.items[item.id];
     const hasNote = !!state.note;
-    const noteDisplay = hasNote
-      ? `<div class="item-note-inline has-note" onclick="event.stopPropagation(); openPopup('${item.id}')">${state.note}</div>`
-      : `<div class="item-note-inline empty" onclick="event.stopPropagation(); openPopup('${item.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px;display:inline-block;vertical-align:middle"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>`;
-    return `<div class="item-row ${state.checked ? 'checked' : ''}" id="row-${item.id}" onclick="toggleItem('${item.id}')">
-      <div class="item-check">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-      </div>
+    const hasHints = getHints(item.id).length > 0;
+    return `<div class="item-cell ${state.checked ? 'checked' : ''}" id="row-${item.id}" onclick="toggleItem('${item.id}')">
+      <svg class="cell-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+      ${hasHints ? `<button class="hint-btn" onclick="event.stopPropagation(); openHint('${item.id}')" aria-label="ヒント">?</button>` : ''}
       <div class="item-icon">${item.icon}</div>
-      <div class="item-info">
-        <div class="item-name">${item.label}</div>
-      </div>
-      ${noteDisplay}
+      <div class="item-name">${item.label}</div>
+      ${hasNote ? `<div class="cell-note" onclick="event.stopPropagation(); openPopup('${item.id}')">✎ ${state.note}</div>` : ''}
     </div>`;
   }).join('');
 }
 
 function toggleItem(id) {
-  currentForm.items[id].checked = !currentForm.items[id].checked;
+  const wasChecked = currentForm.items[id].checked;
+  currentForm.items[id].checked = !wasChecked;
   renderItems();
+  scheduleDraftSave();
+  if (!wasChecked) openPopup(id);
 }
 
 // ── POPUP ──
 function openPopup(itemId) {
   currentPopupItemId = itemId;
   const item = ITEMS.find(i => i.id === itemId);
-  document.getElementById('popup-title').textContent = item.label + ' — メモ';
+  document.getElementById('popup-title').textContent = item.label + ' — 特記事項（なければ閉じてOK）';
   document.getElementById('popup-note').value = currentForm.items[itemId].note || '';
   document.getElementById('note-popup').classList.add('show');
   setTimeout(() => document.getElementById('popup-note').focus(), 100);
@@ -1381,18 +2211,135 @@ function closePopup() {
   currentPopupItemId = null;
 }
 
+let currentHintItemId = null;
+
+function openHint(itemId) {
+  const item = ITEMS.find(i => i.id === itemId);
+  if (!item) return;
+  currentHintItemId = itemId;
+  renderHintList(itemId);
+  document.getElementById('hint-popup').classList.add('show');
+}
+
+function renderHintList(itemId) {
+  const item = ITEMS.find(i => i.id === itemId);
+  const hints = getHints(itemId);
+  document.getElementById('hint-popup-title').textContent = item.label + ' — ヒント';
+  document.getElementById('hint-list').innerHTML = hints.map((h, idx) =>
+    `<div style="display:flex;align-items:flex-start;gap:8px;background:var(--surface);border:1px solid var(--border);border-left:2px solid var(--accent2);border-radius:2px;padding:11px 14px">
+      <div style="flex:1;font-size:14px;color:var(--text2);line-height:1.6">${h}</div>
+      <button onclick="editHint('${itemId}', ${idx})" style="flex-shrink:0;background:none;border:none;cursor:pointer;color:var(--text3);padding:2px;display:flex;align-items:center;margin-top:2px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:12px;height:12px"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      </button>
+      <button onclick="deleteHint('${itemId}', ${idx})" style="flex-shrink:0;background:none;border:none;cursor:pointer;color:var(--text3);padding:2px;display:flex;align-items:center;margin-top:2px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:12px;height:12px"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>`
+  ).join('') +
+  `<div style="display:flex;gap:6px;margin-top:4px">
+    <input type="text" id="new-hint-input" placeholder="新しい質問を追加" style="flex:1;font-size:13px;padding:9px 12px">
+    <button onclick="addHint('${itemId}')" style="background:var(--accent);border:none;border-radius:2px;padding:0 14px;color:var(--bg);font-family:DM Sans,sans-serif;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap">追加</button>
+  </div>`;
+}
+
+function addHint(itemId) {
+  const input = document.getElementById('new-hint-input');
+  const val = input.value.trim();
+  if (!val) return;
+  const hints = getHints(itemId);
+  hints.push(val);
+  saveHints(itemId, hints);
+  input.value = '';
+  renderHintList(itemId);
+}
+
+function deleteHint(itemId, idx) {
+  const hints = getHints(itemId);
+  hints.splice(idx, 1);
+  saveHints(itemId, hints);
+  renderHintList(itemId);
+}
+
+function editHint(itemId, idx) {
+  const hints = getHints(itemId);
+  const newText = prompt('質問を編集してください', hints[idx]);
+  if (newText === null || newText.trim() === '') return;
+  hints[idx] = newText.trim();
+  saveHints(itemId, hints);
+  renderHintList(itemId);
+}
+
+function closeHintPopup() {
+  document.getElementById('hint-popup').classList.remove('show');
+  currentHintItemId = null;
+}
+
+function openFlagDetail(flagId) {
+  const flag = FLAGS.find(f => f.id === flagId);
+  if (!flag) return;
+  const matched = scopedVisits()
+    .filter(v => v.flags?.[flagId])
+    .sort((a, b) => (b.dateKey || '').localeCompare(a.dateKey || ''));
+
+  document.getElementById('flag-detail-title').textContent = `${flag.label}（${matched.length}件）`;
+
+  const listEl = document.getElementById('flag-detail-list');
+  if (matched.length === 0) {
+    listEl.innerHTML = '<div style="font-size:13px;color:var(--text3);text-align:center;padding:24px">該当する記録はありません</div>';
+  } else {
+    listEl.innerHTML = matched.map(v => {
+      let dateLabel = v.datetime || '';
+      if (v.dateKey) {
+        const dd = new Date(v.dateKey);
+        if (!isNaN(dd.getTime())) {
+          const wd = ['日','月','火','水','木','金','土'][dd.getDay()];
+          dateLabel = `${dd.getFullYear()}.${String(dd.getMonth()+1).padStart(2,'0')}.${String(dd.getDate()).padStart(2,'0')} (${wd})`;
+        }
+      }
+      const memo = v.flagMemo ? v.flagMemo.replace(/</g,'&lt;').replace(/>/g,'&gt;') : '';
+      return `<div onclick="jumpFromFlagDetail('${v.id}')" style="background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--active);border-radius:2px;padding:12px 14px;cursor:pointer">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:${memo?'8px':'0'}">
+          <span style="font-size:14px;color:var(--text);font-weight:500;flex:1">${v.facility || '（施設名未入力）'}</span>
+          <span style="font-family:DM Mono,monospace;font-size:11px;color:var(--text3);white-space:nowrap">${dateLabel}</span>
+        </div>
+        ${memo ? `<div style="font-size:12px;color:var(--text2);line-height:1.5;white-space:pre-wrap">${memo}</div>` : ''}
+      </div>`;
+    }).join('');
+  }
+  document.getElementById('flag-detail-popup').classList.add('show');
+}
+
+function closeFlagDetail() {
+  document.getElementById('flag-detail-popup').classList.remove('show');
+}
+
+function jumpFromFlagDetail(id) {
+  closeFlagDetail();
+  detailReturnTo = 'screen-summary';
+  openDetail(id);
+}
+
 function saveNote() {
   if (!currentPopupItemId) return;
   currentForm.items[currentPopupItemId].note = document.getElementById('popup-note').value.trim();
   currentForm.items[currentPopupItemId].checked = true;
   closePopup();
   renderItems();
+  scheduleDraftSave();
 }
 
 // ── SAVE ──
 function saveVisit() {
-  const facility = document.getElementById('f-facility').value.trim();
-  if (!facility) { showToast('施設を選択してください'); return; }
+  const rawFacility = document.getElementById('f-facility').value.trim();
+  if (!rawFacility) { showToast('施設名を入力してください'); return; }
+  // 正規化して既存施設と照合（ゆらぎ吸収）。一致すれば既存の表記に統一
+  const facility = resolveFacilityName(rawFacility);
+  // 新規施設ならマスターに自動登録
+  if (!facilities.some(f => normalizeFacility(f) === normalizeFacility(facility))) {
+    facilities.push(facility);
+    facilities.sort((a, b) => a.localeCompare(b, 'ja'));
+    localStorage.setItem('facilities', JSON.stringify(facilities));
+  }
 
   // 編集の場合は元の日時を維持、新規の場合は今の日時
   let datetime, yearMonth, dateKey;
@@ -1411,10 +2358,14 @@ function saveVisit() {
   const visit = {
     id: editingVisitId || Date.now().toString(),
     facility,
+    pref: document.getElementById('f-pref').value,
+    reporter: document.getElementById('f-reporter').value.trim(),
     contact: document.getElementById('f-contact').value.trim(),
     mainWork: document.getElementById('f-main-work').value,
     memo: document.getElementById('f-memo').value.trim(),
     flagMemo: document.getElementById('f-flag-memo').value.trim(),
+    hypothesis: document.getElementById('f-hypothesis').value.trim(),
+    hypothesisResult: editingVisitId ? (visits.find(v => v.id === editingVisitId)?.hypothesisResult ?? null) : null,
     items: JSON.parse(JSON.stringify(currentForm.items)),
     flags: JSON.parse(JSON.stringify(currentForm.flags)),
     datetime,
@@ -1431,10 +2382,19 @@ function saveVisit() {
   }
 
   localStorage.setItem('visits', JSON.stringify(visits));
+  if (!editingVisitId) clearDraft();
   showToast(editingVisitId ? '更新しました' : '保存しました');
   editingVisitId = null;
   renderList();
   showScreen('screen-list');
+}
+
+function verifyHypothesis(visitId, result) {
+  const v = visits.find(v => v.id === visitId);
+  if (!v) return;
+  v.hypothesisResult = result;
+  localStorage.setItem('visits', JSON.stringify(visits));
+  showPrevVisit();
 }
 
 function showPrevVisit() {
@@ -1474,25 +2434,65 @@ function showPrevVisit() {
     }
   }
 
+  // 前回の仮説・提案 → 検証
+  let hypoBlock = '';
+  if (prev.hypothesis) {
+    const r = prev.hypothesisResult;
+    const resultMeta = {
+      hit:  { label: '当たり', color: 'var(--success)' },
+      half: { label: '半分',   color: 'var(--text2)' },
+      miss: { label: '外れ',   color: 'var(--danger)' },
+    };
+    let verifyUI;
+    if (r && resultMeta[r]) {
+      verifyUI = `<span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:${resultMeta[r].color}">
+        <span style="width:7px;height:7px;border-radius:50%;background:${resultMeta[r].color}"></span>${resultMeta[r].label}
+        <span onclick="verifyHypothesis('${prev.id}', null)" style="margin-left:4px;color:var(--text3);font-size:10px;cursor:pointer;text-decoration:underline">取消</span>
+      </span>`;
+    } else {
+      const btn = (val, txt, col) => `<button type="button" onclick="verifyHypothesis('${prev.id}', '${val}')" style="flex:1;font-size:12px;font-weight:600;padding:7px 4px;border:1px solid var(--border);background:var(--surface);color:${col};border-radius:3px;cursor:pointer">${txt}</button>`;
+      verifyUI = `<div style="display:flex;gap:6px;margin-top:6px">
+        ${btn('hit', '◯ 当たり', 'var(--success)')}
+        ${btn('half', '△ 半分', 'var(--text2)')}
+        ${btn('miss', '✗ 外れ', 'var(--danger)')}
+      </div>`;
+    }
+    hypoBlock = `<div style="margin-top:8px;padding-top:8px;border-top:1px dashed var(--border)">
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+        <span style="font-size:10px;font-family:DM Mono,monospace;letter-spacing:0.08em;color:var(--text3);text-transform:uppercase">前回の仮説・提案</span>
+        ${r ? verifyUI : ''}
+      </div>
+      <div style="font-size:12px;color:var(--text2);margin-top:4px;line-height:1.5">${prev.hypothesis}</div>
+      ${r ? '' : verifyUI}
+    </div>`;
+  }
+
   el.innerHTML = `
     <div style="background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent2);border-radius:2px;padding:12px 14px">
       <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:13px;height:13px;color:var(--text3)"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        <span style="font-size:11px;font-family:'DM Mono',monospace;letter-spacing:0.08em;color:var(--text3);text-transform:uppercase">前回訪問</span>
-        <span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text2)">${prevDateLabel}</span>
+        <span style="font-size:11px;font-family:DM Mono,monospace;letter-spacing:0.08em;color:var(--text3);text-transform:uppercase">前回訪問</span>
+        <span style="font-family:DM Mono,monospace;font-size:12px;color:var(--text2)">${prevDateLabel}</span>
         ${flagBadge}
       </div>
       ${prev.mainWork ? `<div style="font-size:13px;color:var(--text);font-weight:500">${prev.mainWork}</div>` : ''}
       ${itemTags}
       ${prev.flagMemo ? `<div style="font-size:12px;color:var(--text2);margin-top:6px;line-height:1.5;padding-top:6px;border-top:1px dashed var(--border)">${prev.flagMemo}</div>` : ''}
+      ${hypoBlock}
     </div>
   `;
   el.style.display = 'block';
 }
 
 function saveAndExport() {
-  const facility = document.getElementById('f-facility').value.trim();
-  if (!facility) { showToast('施設を選択してください'); return; }
+  const rawFacility = document.getElementById('f-facility').value.trim();
+  if (!rawFacility) { showToast('施設名を入力してください'); return; }
+  const facility = resolveFacilityName(rawFacility);
+  if (!facilities.some(f => normalizeFacility(f) === normalizeFacility(facility))) {
+    facilities.push(facility);
+    facilities.sort((a, b) => a.localeCompare(b, 'ja'));
+    localStorage.setItem('facilities', JSON.stringify(facilities));
+  }
 
   let datetime, yearMonth, dateKey;
   if (editingVisitId) {
@@ -1511,10 +2511,14 @@ function saveAndExport() {
   const visit = {
     id,
     facility,
+    pref: document.getElementById('f-pref').value,
+    reporter: document.getElementById('f-reporter').value.trim(),
     contact: document.getElementById('f-contact').value.trim(),
     mainWork: document.getElementById('f-main-work').value,
     memo: document.getElementById('f-memo').value.trim(),
     flagMemo: document.getElementById('f-flag-memo').value.trim(),
+    hypothesis: document.getElementById('f-hypothesis').value.trim(),
+    hypothesisResult: editingVisitId ? (visits.find(v => v.id === editingVisitId)?.hypothesisResult ?? null) : null,
     items: JSON.parse(JSON.stringify(currentForm.items)),
     flags: JSON.parse(JSON.stringify(currentForm.flags)),
     datetime,
@@ -1531,6 +2535,7 @@ function saveAndExport() {
   }
 
   localStorage.setItem('visits', JSON.stringify(visits));
+  if (!editingVisitId) clearDraft();
   editingVisitId = null;
   renderList();
   exportFromDetail(id);
@@ -1540,6 +2545,7 @@ function saveAndExport() {
 // ── EXPORT ──
 function exportVisit() {
   const facility = document.getElementById('f-facility').value.trim() || '（施設名）';
+  const reporter = document.getElementById('f-reporter').value.trim();
   const contact = document.getElementById('f-contact').value.trim();
   const mainWork = document.getElementById('f-main-work').value || '—';
   const memo = document.getElementById('f-memo').value.trim();
@@ -1558,6 +2564,7 @@ function exportVisit() {
     `【訪問報告】${facility}　${dateStr}`,
     ``,
     `■ 施設：${facility}`,
+    reporter ? `■ 訪問者：${reporter}` : '',
     contact ? `■ 担当：${contact}` : '',
     `■ 作業：${mainWork}`,
     ``,
@@ -1567,12 +2574,12 @@ function exportVisit() {
 
   const subject = encodeURIComponent(`【訪問報告】${facility} ${dateStr}`);
   const bodyEncoded = encodeURIComponent(body);
-  window.location.href = `mailto:?subject=${subject}&body=${bodyEncoded}`;
+  window.location.href = `mailto:${getPbEmailTo()}?subject=${subject}&body=${bodyEncoded}`;
 }
 
 // ── DETAIL ──
 function openDetail(id) {
-  const v = visits.find(v => v.id === id);
+  const v = visits.find(v => v.id === id) || importedVisits.find(v => v.id === id);
   if (!v) return;
 
   const itemsHtml = ITEMS.map(item => {
@@ -1614,7 +2621,7 @@ function openDetail(id) {
     <div class="detail-hero">
       <div class="detail-facility">${v.facility || '（施設名未入力）'}</div>
       <div class="detail-meta">
-        ${dateLabel}
+        ${v.pref ? v.pref + '<br>' : ''}${dateLabel}
         ${v.contact ? '<br>' + v.contact : ''}
         ${v.mainWork ? '<br>' + v.mainWork : ''}
       </div>
@@ -1631,6 +2638,43 @@ function openDetail(id) {
       <div class="detail-block-label">メモ</div>
       <div class="detail-memo-text">${v.memo}</div>
     </div>` : ''}
+
+    <div style="padding:16px 24px;border-bottom:1px solid var(--border)">
+      <div style="font-size:10px;font-family:DM Mono,monospace;letter-spacing:0.1em;color:var(--text3);text-transform:uppercase;margin-bottom:12px">ステータス追跡</div>
+      <div style="display:flex;align-items:center;margin-bottom:10px;position:relative">
+        ${(function(){
+          const statuses = [['sent','つなぎ済'],['inprogress','営業対応中'],['proposed','提案済み'],['contracted','成約'],['lost','見送り']];
+          const curKey = v.dealStatus || 'sent';
+          const mainKeys = ['sent','inprogress','proposed'];
+          const mainIdx = mainKeys.indexOf(curKey);
+          return statuses.map(([key,label],i) => {
+            const isResult = key==='contracted'||key==='lost';
+            const isContracted = curKey==='contracted', isLost = curKey==='lost';
+            let done=false, current=false;
+            if(!isResult){ const idx=mainKeys.indexOf(key); done=(!isContracted&&!isLost&&mainIdx>idx); current=(!isContracted&&!isLost&&mainIdx===idx); }
+            else { current = curKey===key; }
+            const rColor = key==='contracted'?'#3d6b52':'#993c1d';
+            const dotBd = done?'#3d6b52':current?(isResult?rColor:'var(--text)'):'var(--border)';
+            const dotBg = done?'#3d6b52':current?(isResult?(key==='contracted'?'#eaf3de':'#faf3ef'):'var(--surface)'):'var(--surface)';
+            const txColor = done?'#3d6b52':current?(isResult?rColor:'var(--text)'):'var(--text3)';
+            const lineColor = done?'#3d6b52':'var(--border)';
+            return '<div onclick="updateDealStatus(\'' + v.id + '\',\'' + key + '\')" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;position:relative;cursor:pointer;padding:4px 0">'
+              + (i<4?'<div style="position:absolute;top:11px;left:50%;width:100%;height:1.5px;background:'+lineColor+'"></div>':'')
+              + '<div style="width:22px;height:22px;border-radius:50%;border:2px solid '+dotBd+';background:'+dotBg+';display:flex;align-items:center;justify-content:center;z-index:1">'
+              + (done?'<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" style="width:10px;height:10px"><polyline points="20 6 9 17 4 12"/></svg>':current?'<div style="width:8px;height:8px;border-radius:50%;background:'+(isResult?rColor:'var(--text)')+'"></div>':'')
+              + '</div>'
+              + '<div style="font-size:9px;color:'+txColor+';font-weight:'+(current||done?'500':'400')+';white-space:nowrap;text-align:center">'+label+'</div>'
+              + '</div>';
+          }).join('');
+        })()}
+      </div>
+    </div>
+
+    <div style="padding:16px 24px;border-bottom:1px solid var(--border)">
+      <div style="font-size:10px;font-family:DM Mono,monospace;letter-spacing:0.1em;color:var(--text3);text-transform:uppercase;margin-bottom:8px">営業からのコメント</div>
+      <textarea onchange="updateFeedback('${v.id}',this.value)" style="width:100%;border:1px solid var(--border);border-radius:2px;padding:10px 12px;font-size:13px;color:var(--text2);box-sizing:border-box;resize:none;height:70px;background:var(--surface);font-family:DM Sans,sans-serif" placeholder="例：予算感が明確で動きやすかった。来月アポ予定。">${v.salesFeedback||''}</textarea>
+    </div>
+    </div>
 
     <div style="padding:20px 24px 40px;display:flex;flex-direction:column;gap:8px">
       <button class="btn-export" style="width:100%;justify-content:center;padding:16px;background:var(--accent);color:var(--bg);border-color:var(--accent)" onclick="openEditVisit('${v.id}')">
@@ -1714,35 +2758,450 @@ function exportAllText() {
 }
 
 function exportAllCSV() {
-  if (visits.length === 0) { showToast('記録がありません'); return; }
-  const headers = ['日時','施設','担当者','メイン作業',
-    ...ITEMS.map(i => i.label),
-    ...ITEMS.map(i => i.label + '_メモ'),
-    'つなぐ（共有事項）','共有メモ','メモ'];
-  const escape = s => {
-    if (s == null) return '';
-    s = String(s);
-    if (/[",\n]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
-    return s;
-  };
-  const sorted = visits.slice().sort((a, b) => {
+  const base = exportBaseVisits();
+  if (base.length === 0) { showToast('記録がありません'); return; }
+  const sorted = base.slice().sort((a, b) => {
     const ymA = a.yearMonth || '', ymB = b.yearMonth || '';
     if (ymA !== ymB) return ymA.localeCompare(ymB);
-    return a.datetime.localeCompare(b.datetime);
+    return (a.dateKey || '').localeCompare(b.dateKey || '');
   });
-  const rows = sorted.map(v => {
-    const row = [v.datetime, v.facility, v.contact || '', v.mainWork || ''];
-    ITEMS.forEach(i => row.push(v.items[i.id]?.checked ? '○' : ''));
-    ITEMS.forEach(i => row.push(v.items[i.id]?.note || ''));
-    const flagLabels = FLAGS.filter(f => v.flags?.[f.id]).map(f => f.label).join('・');
-    row.push(flagLabels);
-    row.push(v.flagMemo || '');
-    row.push(v.memo || '');
-    return row.map(escape).join(',');
+  exportExcel(sorted, `訪問記録_${getDateStamp()}_${base.length}件.xlsx`);
+  showToast(`${base.length}件をExcelで出力`);
+}
+
+let selectedExportMonth = null;
+function exportBaseVisits() {
+  const cb = document.getElementById('export-include-imported');
+  return (cb && cb.checked) ? visits.concat(importedVisits) : visits;
+}
+
+function exportMonthCSV() {
+  const ym = selectedExportMonth;
+  if (!ym) { showToast('月を選択してください'); return; }
+  const monthly = exportBaseVisits().filter(v => v.yearMonth === ym);
+  if (monthly.length === 0) { showToast('この月の記録はありません'); return; }
+  const sorted = monthly.slice().sort((a, b) => (a.dateKey || '').localeCompare(b.dateKey || ''));
+  exportExcel(sorted, `訪問記録_${ym}_${monthly.length}件.xlsx`);
+  showToast(`${monthly.length}件をExcelで出力`);
+}
+
+function exportExcel(rows, filename) {
+  if (typeof XLSX === 'undefined') {
+    showToast('Excelライブラリ読込中。再度お試しください');
+    return;
+  }
+
+  // ヘッダー：固定列 + 各ITEMSごとに○列・メモ列 + 末尾メモ
+  const headers = [
+    '日付', '施設', '担当者', '訪問理由', 'つなぐ', '共有メモ',
+    ...ITEMS.flatMap(i => [i.label, `${i.label}_メモ`]),
+    'メモ'
+  ];
+
+  // データ行を構築
+  const dataRows = rows.map(v => {
+    let dateStr = '';
+    if (v.dateKey) {
+      const d = new Date(v.dateKey);
+      if (!isNaN(d.getTime())) {
+        dateStr = `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`;
+      }
+    }
+    const flagLabels = FLAGS.filter(f => v.flags?.[f.id]).map(f => f.label).join('／');
+    const itemCols = ITEMS.flatMap(i => {
+      const state = v.items?.[i.id];
+      return [state?.checked ? '○' : '', state?.note || ''];
+    });
+    return {
+      row: [dateStr, v.facility || '', v.contact || '', v.mainWork || '', flagLabels, v.flagMemo || '', ...itemCols, v.memo || ''],
+      _hasFlag: flagLabels !== '',
+    };
   });
-  const content = '\uFEFF' + headers.map(escape).join(',') + '\n' + rows.join('\n');
-  downloadFile(content, `訪問記録_${getDateStamp()}_${visits.length}件.csv`, 'text/csv');
-  showToast(`${visits.length}件をCSVで出力`);
+
+  // シート配列を構築
+  const aoa = [headers, ...dataRows.map(r => r.row)];
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+
+  // スタイル定義
+  const borderAll = {
+    top:    { style: 'thin', color: { rgb: '999999' } },
+    bottom: { style: 'thin', color: { rgb: '999999' } },
+    left:   { style: 'thin', color: { rgb: '999999' } },
+    right:  { style: 'thin', color: { rgb: '999999' } },
+  };
+  const headerStyle = {
+    font: { bold: true, color: { rgb: 'FFFFFF' }, sz: 11 },
+    fill: { fgColor: { rgb: '3D6B52' } },
+    alignment: { horizontal: 'center', vertical: 'center', wrapText: true },
+    border: borderAll,
+  };
+  const cellStyle = {
+    alignment: { vertical: 'top', wrapText: true },
+    border: borderAll,
+  };
+  const cellStyleHighlight = {
+    alignment: { vertical: 'top', wrapText: true },
+    border: borderAll,
+    fill: { fgColor: { rgb: 'E8F0EB' } },
+  };
+  // ○セル（中央揃え）
+  const cellStyleCheck = {
+    alignment: { vertical: 'center', horizontal: 'center', wrapText: true },
+    border: borderAll,
+  };
+  const cellStyleCheckHighlight = {
+    alignment: { vertical: 'center', horizontal: 'center', wrapText: true },
+    border: borderAll,
+    fill: { fgColor: { rgb: 'E8F0EB' } },
+  };
+
+  // ○列のインデックス（固定6列の後、2列ずつのうち偶数番目）
+  const fixedColsBefore = 6; // 日付,施設,担当者,訪問理由,つなぐ,共有メモ
+  const checkColIndexes = new Set();
+  ITEMS.forEach((_, idx) => {
+    checkColIndexes.add(fixedColsBefore + idx * 2);
+  });
+
+  // 全セルにスタイル適用
+  const range = XLSX.utils.decode_range(ws['!ref']);
+  for (let R = range.s.r; R <= range.e.r; R++) {
+    const isHeader = R === 0;
+    const dataIdx = R - 1;
+    const isHighlighted = !isHeader && dataRows[dataIdx]?._hasFlag;
+    for (let C = range.s.c; C <= range.e.c; C++) {
+      const addr = XLSX.utils.encode_cell({ r: R, c: C });
+      if (!ws[addr]) ws[addr] = { t: 's', v: '' };
+      if (isHeader) {
+        ws[addr].s = headerStyle;
+      } else if (checkColIndexes.has(C)) {
+        ws[addr].s = isHighlighted ? cellStyleCheckHighlight : cellStyleCheck;
+      } else if (isHighlighted) {
+        ws[addr].s = cellStyleHighlight;
+      } else {
+        ws[addr].s = cellStyle;
+      }
+    }
+  }
+
+  // 列幅
+  const cols = [
+    { wch: 12 }, // 日付
+    { wch: 22 }, // 施設
+    { wch: 12 }, // 担当者
+    { wch: 16 }, // 訪問理由
+    { wch: 18 }, // つなぐ
+    { wch: 28 }, // 共有メモ
+  ];
+  ITEMS.forEach(() => {
+    cols.push({ wch: 8 });  // ○列は狭く
+    cols.push({ wch: 20 }); // メモ列
+  });
+  cols.push({ wch: 28 }); // メモ
+  ws['!cols'] = cols;
+
+  // ヘッダー行を固定
+  ws['!rows'] = [{ hpt: 28 }];
+  ws['!freeze'] = { xSplit: 2, ySplit: 1 }; // 日付・施設の2列も固定
+
+  const wb = XLSX.utils.book_new();
+
+  // 集計シートを先に追加
+  const summaryWs = buildSummarySheet(rows, headerStyle, cellStyle, borderAll);
+  if (summaryWs) {
+    XLSX.utils.book_append_sheet(wb, summaryWs, '集計');
+  }
+
+  XLSX.utils.book_append_sheet(wb, ws, '訪問記録');
+  XLSX.writeFile(wb, filename);
+}
+
+function buildSummarySheet(rows, headerStyle, cellStyle, borderAll) {
+  if (rows.length === 0) return null;
+
+  // 月リスト（昇順）
+  const months = [...new Set(rows.map(v => v.yearMonth).filter(Boolean))].sort();
+  if (months.length === 0) return null;
+
+  // 集計
+  const visitCountByMonth = {};
+  const itemCountByMonth = {};   // {ym: {itemId: count}}
+  const flagCountByMonth = {};   // {ym: {flagId: count}}
+
+  months.forEach(ym => {
+    visitCountByMonth[ym] = 0;
+    itemCountByMonth[ym] = {};
+    flagCountByMonth[ym] = {};
+    ITEMS.forEach(i => itemCountByMonth[ym][i.id] = 0);
+    FLAGS.forEach(f => flagCountByMonth[ym][f.id] = 0);
+  });
+
+  rows.forEach(v => {
+    const ym = v.yearMonth;
+    if (!ym || !visitCountByMonth.hasOwnProperty(ym)) return;
+    visitCountByMonth[ym]++;
+    ITEMS.forEach(i => {
+      if (v.items?.[i.id]?.checked) itemCountByMonth[ym][i.id]++;
+    });
+    FLAGS.forEach(f => {
+      if (v.flags?.[f.id]) flagCountByMonth[ym][f.id]++;
+    });
+  });
+
+  // 月ラベル整形（"2025-11" → "2025/11"）
+  const monthLabels = months.map(ym => ym.replace('-', '/'));
+  const totalVisits = rows.length;
+
+  // aoa構築
+  const aoa = [];
+
+  // タイトル行
+  const periodLabel = months.length === 1
+    ? monthLabels[0]
+    : `${monthLabels[0]} 〜 ${monthLabels[monthLabels.length - 1]}`;
+  aoa.push([`集計期間：${periodLabel}　訪問総数：${totalVisits}件`]);
+  aoa.push([]);
+
+  // セクション1：月別訪問件数
+  aoa.push(['【月別 訪問件数】']);
+  aoa.push(['', ...monthLabels, '合計']);
+  aoa.push(['訪問件数', ...months.map(ym => visitCountByMonth[ym]), totalVisits]);
+  aoa.push([]);
+
+  // セクション2：あつめる項目
+  aoa.push(['【月別 あつめる項目(件数)】']);
+  aoa.push(['', ...monthLabels, '合計']);
+  ITEMS.forEach(i => {
+    const counts = months.map(ym => itemCountByMonth[ym][i.id]);
+    const total = counts.reduce((a, b) => a + b, 0);
+    aoa.push([i.label, ...counts, total]);
+  });
+  aoa.push([]);
+
+  // セクション3：つなぐ
+  aoa.push(['【月別 つなぐ(件数)】']);
+  aoa.push(['', ...monthLabels, '合計']);
+  FLAGS.forEach(f => {
+    const counts = months.map(ym => flagCountByMonth[ym][f.id]);
+    const total = counts.reduce((a, b) => a + b, 0);
+    aoa.push([f.label, ...counts, total]);
+  });
+
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+
+  // スタイル
+  const titleStyle = {
+    font: { bold: true, sz: 13, color: { rgb: '3D6B52' } },
+    alignment: { vertical: 'center' },
+  };
+  const sectionStyle = {
+    font: { bold: true, sz: 11, color: { rgb: 'FFFFFF' } },
+    fill: { fgColor: { rgb: '3D6B52' } },
+    alignment: { vertical: 'center' },
+    border: borderAll,
+  };
+  const tableHeaderStyle = {
+    font: { bold: true, sz: 10, color: { rgb: 'FFFFFF' } },
+    fill: { fgColor: { rgb: '7A9485' } },
+    alignment: { horizontal: 'center', vertical: 'center' },
+    border: borderAll,
+  };
+  const labelCellStyle = {
+    font: { bold: true, sz: 11 },
+    fill: { fgColor: { rgb: 'F0F2F1' } },
+    alignment: { vertical: 'center' },
+    border: borderAll,
+  };
+  const numCellStyle = {
+    alignment: { horizontal: 'center', vertical: 'center' },
+    border: borderAll,
+  };
+  const totalCellStyle = {
+    font: { bold: true },
+    fill: { fgColor: { rgb: 'F0F2F1' } },
+    alignment: { horizontal: 'center', vertical: 'center' },
+    border: borderAll,
+  };
+
+  // セルスタイル適用
+  const range = XLSX.utils.decode_range(ws['!ref']);
+  const totalColIdx = months.length + 1; // 0=ラベル, 1〜months.length=月, +1=合計列
+
+  for (let R = range.s.r; R <= range.e.r; R++) {
+    const row = aoa[R];
+    if (!row || row.length === 0) continue;
+    const firstCell = row[0];
+
+    // タイトル行
+    if (R === 0) {
+      const addr = XLSX.utils.encode_cell({ r: R, c: 0 });
+      if (ws[addr]) ws[addr].s = titleStyle;
+      continue;
+    }
+
+    // セクション見出し行（【】で始まる）
+    if (typeof firstCell === 'string' && firstCell.startsWith('【')) {
+      for (let C = 0; C <= totalColIdx; C++) {
+        const addr = XLSX.utils.encode_cell({ r: R, c: C });
+        if (!ws[addr]) ws[addr] = { t: 's', v: '' };
+        ws[addr].s = sectionStyle;
+      }
+      continue;
+    }
+
+    // 表ヘッダー行（最初が空で月ラベルが続く）
+    if (firstCell === '' && row.length > 1 && monthLabels.includes(row[1])) {
+      for (let C = 0; C <= totalColIdx; C++) {
+        const addr = XLSX.utils.encode_cell({ r: R, c: C });
+        if (!ws[addr]) ws[addr] = { t: 's', v: '' };
+        ws[addr].s = tableHeaderStyle;
+      }
+      continue;
+    }
+
+    // データ行（最初のセルにラベルがあり、その後数値）
+    if (typeof firstCell === 'string' && firstCell !== '' && !firstCell.startsWith('【')) {
+      for (let C = 0; C <= totalColIdx; C++) {
+        const addr = XLSX.utils.encode_cell({ r: R, c: C });
+        if (!ws[addr]) ws[addr] = { t: 's', v: '' };
+        if (C === 0) {
+          ws[addr].s = labelCellStyle;
+        } else if (C === totalColIdx) {
+          ws[addr].s = totalCellStyle;
+        } else {
+          ws[addr].s = numCellStyle;
+        }
+      }
+    }
+  }
+
+  // 列幅
+  ws['!cols'] = [
+    { wch: 20 }, // ラベル
+    ...months.map(() => ({ wch: 10 })),
+    { wch: 10 }, // 合計
+  ];
+
+  // タイトル行を結合
+  ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: totalColIdx } }];
+
+  // タイトル行の高さ
+  ws['!rows'] = [{ hpt: 24 }];
+
+  return ws;
+}
+
+function setExportTab(tab) {
+  const monthBtn = document.getElementById('export-tab-month');
+  const allBtn = document.getElementById('export-tab-all');
+  const monthPanel = document.getElementById('export-panel-month');
+  const allPanel = document.getElementById('export-panel-all');
+  if (tab === 'month') {
+    monthBtn.style.background = 'var(--accent)';
+    monthBtn.style.color = 'var(--bg)';
+    allBtn.style.background = 'none';
+    allBtn.style.color = 'var(--text2)';
+    monthPanel.style.display = '';
+    allPanel.style.display = 'none';
+  } else {
+    allBtn.style.background = 'var(--accent)';
+    allBtn.style.color = 'var(--bg)';
+    monthBtn.style.background = 'none';
+    monthBtn.style.color = 'var(--text2)';
+    allPanel.style.display = '';
+    monthPanel.style.display = 'none';
+  }
+}
+
+function populateExportMonths() {
+  const sel = document.getElementById('export-month-select');
+  if (!sel) return;
+  const months = [...new Set(exportBaseVisits().map(v => v.yearMonth).filter(Boolean))].sort().reverse();
+  if (months.length === 0) {
+    sel.innerHTML = `<option value="">記録なし</option>`;
+    selectedExportMonth = null;
+    updateExportMonthStats();
+    return;
+  }
+  if (!selectedExportMonth || !months.includes(selectedExportMonth)) {
+    selectedExportMonth = months[0];
+  }
+  sel.innerHTML = months.map(m => {
+    const [y, mm] = m.split('-');
+    return `<option value="${m}"${m === selectedExportMonth ? ' selected' : ''}>${y}年 ${parseInt(mm)}月</option>`;
+  }).join('');
+  updateExportMonthStats();
+}
+
+function onExportMonthChange() {
+  const sel = document.getElementById('export-month-select');
+  selectedExportMonth = sel.value || null;
+  updateExportMonthStats();
+}
+
+function updateExportMonthStats() {
+  const el = document.getElementById('export-month-stats');
+  if (!el) return;
+  const ym = selectedExportMonth;
+  if (!ym) { el.textContent = '—'; return; }
+  const base = exportBaseVisits();
+  const count = base.filter(v => v.yearMonth === ym).length;
+  const facCount = new Set(base.filter(v => v.yearMonth === ym).map(v => v.facility)).size;
+  el.textContent = `${count}件　／　${facCount}施設`;
+}
+
+// ── 支店データ集約（JSON取り込み） ──
+function importJSONFiles(files) {
+  if (!files || !files.length) return;
+  let added = 0, dup = 0, pending = files.length;
+  Array.from(files).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const payload = JSON.parse(reader.result);
+        const list = Array.isArray(payload) ? payload : (payload.visits || []);
+        const ownIds = new Set(visits.map(v => v.id));
+        const impIds = new Set(importedVisits.map(v => v.id));
+        list.forEach(v => {
+          if (!v || !v.id) return;
+          if (ownIds.has(v.id) || impIds.has(v.id)) { dup++; return; }
+          v.imported = true;
+          importedVisits.push(v);
+          impIds.add(v.id);
+          added++;
+        });
+      } catch (e) { showToast('読み込み失敗：' + file.name); }
+      if (--pending === 0) {
+        localStorage.setItem('importedVisits', JSON.stringify(importedVisits));
+        renderImportStats();
+        showToast(`${added}件を取り込みました${dup ? '（重複' + dup + '件はスキップ）' : ''}`);
+      }
+    };
+    reader.readAsText(file);
+  });
+  document.getElementById('import-json-file').value = '';
+}
+function clearImported() {
+  if (importedVisits.length === 0) { showToast('取り込みデータはありません'); return; }
+  if (!confirm(`取り込み済み${importedVisits.length}件を削除しますか？\n（自分の記録は消えません）`)) return;
+  importedVisits = [];
+  localStorage.removeItem('importedVisits');
+  summaryScope = 'mine';
+  renderImportStats();
+  showToast('取り込みデータを削除しました');
+}
+function renderImportStats() {
+  const el = document.getElementById('import-stats');
+  if (!el) return;
+  const reporters = new Set(importedVisits.map(v => v.reporter).filter(Boolean));
+  el.textContent = importedVisits.length
+    ? `取り込み済み：${importedVisits.length}件（記録者 ${reporters.size}名）`
+    : '取り込みデータなし';
+  const btn = document.getElementById('import-clear-btn');
+  if (btn) btn.style.display = importedVisits.length ? 'block' : 'none';
+}
+function setScope(scope) {
+  summaryScope = scope;
+  renderSummary();
 }
 
 function exportAllJSON() {
@@ -1759,9 +3218,13 @@ function exportAllJSON() {
 }
 
 function renderExportStats() {
+  const wrap = document.getElementById('export-scope-wrap');
+  if (wrap) wrap.style.display = importedVisits.length ? 'flex' : 'none';
   const el = document.getElementById('export-stats');
   if (!el) return;
-  el.textContent = `${visits.length}件　／　${facilities.length}施設`;
+  const base = exportBaseVisits();
+  el.textContent = `${base.length}件　／　${new Set(base.map(v => v.facility)).size}施設`;
+  populateExportMonths();
   // 日付選択をデフォルトで今日に
   const dateInput = document.getElementById('daily-date');
   if (dateInput && !dateInput.value) {
@@ -1818,61 +3281,96 @@ function exportDailyEmail() {
   const [yyyy, mm, dd] = dateKey.split('-');
   const dateLabel = `${parseInt(mm)}/${parseInt(dd)}`;
 
+  // 優先度サマリーを生成
+  const actionVisits = dailyVisits.filter(v => FLAGS.some(f => v.flags?.[f.id]));
+  const infoVisits   = dailyVisits.filter(v => !FLAGS.some(f => v.flags?.[f.id]));
+
+  let summaryBlock = '【本日のサマリー】\n';
+  summaryBlock += `訪問 ${dailyVisits.length}施設`;
+  if (actionVisits.length > 0) summaryBlock += `　/ 要対応 ${actionVisits.length}件`;
+  summaryBlock += '\n';
+
+  if (actionVisits.length > 0) {
+    summaryBlock += '\n▼ 要対応\n';
+    summaryBlock += actionVisits.map(v => {
+      const flagLabels = FLAGS.filter(f => v.flags?.[f.id]).map(f => f.label).join('・');
+      return `★ ${v.facility}　→ ${flagLabels}`;
+    }).join('\n');
+  }
+  if (infoVisits.length > 0) {
+    summaryBlock += '\n\n▼ 情報共有のみ\n';
+    summaryBlock += infoVisits.map(v => `　${v.facility}`).join('\n');
+  }
+
+  // 件名にフラグ状況を反映
+  const subjectPrefix = actionVisits.length > 0 ? '【要対応あり】' : '【情報共有】';
+  const subject = encodeURIComponent(`${subjectPrefix}訪問報告まとめ ${dateLabel}（${dailyVisits.length}施設）`);
+
+  // 各施設の詳細ブロック
   const blocks = dailyVisits.map((v, idx) => {
     const checkedLines = ITEMS
       .filter(i => v.items?.[i.id]?.checked)
-      .map(i => `・${i.label}${v.items[i.id]?.note ? '（' + v.items[i.id].note + '）' : ''}`).join('\n');
+      .map(i => {
+        const note = v.items[i.id]?.note;
+        return note ? `・${i.label}：${note}` : `・${i.label}`;
+      }).join('\n');
     const activeFlags = FLAGS.filter(f => v.flags?.[f.id]).map(f => f.label).join('・');
+    const hasAction = FLAGS.some(f => v.flags?.[f.id]);
+    const dateOnly = (v.datetime || '').split(' ')[0];
     return [
       `━━━━━━━━━━━━━━━━━━━━`,
-      `【${idx + 1}】${v.facility}　${v.datetime}`,
+      `【${idx + 1}】${hasAction ? '★ ' : ''}${v.facility}${v.pref ? '（' + v.pref + '）' : ''}　${dateOnly}`,
       `━━━━━━━━━━━━━━━━━━━━`,
-      v.contact ? `■ 担当:${v.contact}` : '',
-      `■ 作業:${v.mainWork || '—'}`,
-      activeFlags ? `\n■ つなぐ（共有事項）\n${activeFlags}` : '',
-      v.flagMemo ? `\n■ 共有メモ\n${v.flagMemo}` : '',
-      checkedLines ? `\n■ あつめる(施設情報)\n${checkedLines}` : '',
-      v.memo ? `\n■ メモ\n${v.memo}` : '',
+      v.reporter ? `訪問：${v.reporter}` : '',
+      v.contact ? `先方：${v.contact}` : '',
+      `作業：${v.mainWork || '—'}`,
+      (activeFlags || v.flagMemo) ? `\n★ PBへのお願い${activeFlags ? '【' + activeFlags + '】' : ''}${v.flagMemo ? '\n' + v.flagMemo : ''}` : '',
+      checkedLines ? `\n▼ 施設情報\n${checkedLines}` : '',
+      v.memo ? `\n▼ メモ\n${v.memo}` : '',
     ].filter(l => l !== '').join('\n');
   }).join('\n\n');
 
   const body = [
     `お疲れ様です。`,
-    `本日訪問した${dailyVisits.length}施設の報告です。`,
+    `本日の情報共有です。`,
+    ``,
+    summaryBlock,
     ``,
     blocks,
     ``,
     `ご確認をお願いいたします。`,
+    ...(reporterName ? ['', `訪問者：${reporterName}`] : []),
   ].join('\n');
 
-  const subject = encodeURIComponent(`【訪問報告まとめ】${dateLabel}（${dailyVisits.length}施設）`);
-  window.location.href = `mailto:?subject=${subject}&body=${encodeURIComponent(body)}`;
+  window.location.href = `mailto:${getPbEmailTo()}?subject=${subject}&body=${encodeURIComponent(body)}`;
 }
 
 function exportFromDetail(id) {
   const v = visits.find(v => v.id === id);
   if (!v) return;
+  const dateOnly = (v.datetime || '').split(' ')[0];
   const checkedLines = ITEMS.filter(i => v.items[i.id]?.checked)
-    .map(i => `・${i.label}${v.items[i.id]?.note ? '（' + v.items[i.id].note + '）' : ''}`).join('\n');
+    .map(i => {
+      const note = v.items[i.id]?.note;
+      return note ? `・${i.label}：${note}` : `・${i.label}`;
+    }).join('\n');
   const activeFlags = FLAGS.filter(f => v.flags?.[f.id]).map(f => f.label).join('・');
   const body = [
-    `お疲れ様です。`,
-    `表題の件、訪問してきましたので共有いたします。`,
+    `お疲れ様です。訪問報告です。`,
     ``,
-    `【訪問報告】${v.facility}　${v.datetime}`,
+    `${v.facility}${v.pref ? '（' + v.pref + '）' : ''}　${dateOnly}`,
+    v.reporter ? `訪問：${v.reporter}` : '',
+    v.contact ? `先方：${v.contact}` : '',
+    `作業：${v.mainWork || '—'}`,
+    (activeFlags || v.flagMemo) ? `\n★ PBへのお願い${activeFlags ? '【' + activeFlags + '】' : ''}${v.flagMemo ? '\n' + v.flagMemo : ''}` : '',
+    checkedLines ? `\n▼ 施設情報\n${checkedLines}` : '',
+    v.memo ? `\n▼ メモ\n${v.memo}` : '',
     ``,
-    `■ 施設:${v.facility}`,
-    v.contact ? `■ 担当:${v.contact}` : '',
-    `■ 作業:${v.mainWork || '—'}`,
-    activeFlags ? `\n■ つなぐ（共有事項）\n${activeFlags}` : '',
-    v.flagMemo ? `\n■ 共有メモ\n${v.flagMemo}` : '',
-    checkedLines ? `\n■ あつめる(施設情報)\n${checkedLines}` : '',
-    v.memo ? `\n■ メモ\n${v.memo}` : '',
-    ``,
-    `ご確認をお願いいたします。`,
+    `以上、ご確認お願いします。`,
+    reporterName ? reporterName : '',
   ].filter(l => l !== '').join('\n');
-  const subject = encodeURIComponent(`【訪問報告】${v.facility} ${v.datetime}`);
-  window.location.href = `mailto:?subject=${subject}&body=${encodeURIComponent(body)}`;
+  const subject = encodeURIComponent(`【訪問報告】${v.facility} ${dateOnly}`);
+  window.location.href = `mailto:${getPbEmailTo()}?subject=${subject}&body=${encodeURIComponent(body)}`;
   v.exported = true;
   localStorage.setItem('visits', JSON.stringify(visits));
 }
@@ -1882,15 +3380,25 @@ let summaryYear = new Date().getFullYear();
 let summaryMonth = new Date().getMonth() + 1;
 
 function renderSummary() {
+  const scopeWrap = document.getElementById('summary-scope');
+  scopeWrap.style.display = importedVisits.length ? 'block' : 'none';
+  if (!importedVisits.length) summaryScope = 'mine';
+  const mineBtn = document.getElementById('scope-mine');
+  const allBtn = document.getElementById('scope-all');
+  const on = 'background:var(--accent);color:var(--bg)';
+  const off = 'background:none;color:var(--text2)';
+  mineBtn.style.cssText += ';' + (summaryScope === 'mine' ? on : off);
+  allBtn.style.cssText += ';' + (summaryScope === 'all' ? on : off);
+
   const ym = `${summaryYear}-${String(summaryMonth).padStart(2,'0')}`;
   document.getElementById('summary-month-label').textContent =
-    `${summaryYear}年 ${summaryMonth}月`;
+    `${summaryYear}年 ${summaryMonth}月${summaryScope === 'all' ? '（支店全体）' : ''}`;
 
-  const monthly = visits.filter(v => v.yearMonth === ym);
+  const monthly = scopedVisits().filter(v => v.yearMonth === ym);
   const el = document.getElementById('summary-content');
 
   if (monthly.length === 0) {
-    el.innerHTML = `<div style="text-align:center;padding:48px 0;color:var(--text3);font-family:'DM Mono',monospace;font-size:13px">この月の記録なし</div>`;
+    el.innerHTML = `<div style="text-align:center;padding:48px 0;color:var(--text3);font-family:DM Mono,monospace;font-size:13px">この月の記録なし</div>`;
     return;
   }
 
@@ -1921,11 +3429,11 @@ function renderSummary() {
     <!-- KPI -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;margin-top:8px">
       <div style="background:var(--surface);border:1px solid var(--border);border-radius:2px;padding:16px">
-        <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;color:var(--text3);text-transform:uppercase;margin-bottom:6px">訪問件数</div>
+        <div style="font-family:DM Mono,monospace;font-size:10px;letter-spacing:0.1em;color:var(--text3);text-transform:uppercase;margin-bottom:6px">訪問件数</div>
         <div style="font-size:32px;font-weight:500;color:var(--text);letter-spacing:-0.03em">${monthly.length}<span style="font-size:14px;color:var(--text3);margin-left:2px">件</span></div>
       </div>
       <div style="background:var(--surface);border:1px solid var(--border);border-radius:2px;padding:16px">
-        <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;color:var(--text3);text-transform:uppercase;margin-bottom:6px">施設数</div>
+        <div style="font-family:DM Mono,monospace;font-size:10px;letter-spacing:0.1em;color:var(--text3);text-transform:uppercase;margin-bottom:6px">施設数</div>
         <div style="font-size:32px;font-weight:500;color:var(--text);letter-spacing:-0.03em">${Object.keys(facilityCount).length}<span style="font-size:14px;color:var(--text3);margin-left:2px">施設</span></div>
       </div>
     </div>
@@ -1933,29 +3441,32 @@ function renderSummary() {
     <!-- つなぐ（共有事項）統計 -->
     ${totalFlags > 0 ? `<div style="background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--active);border-radius:2px;padding:16px;margin-bottom:10px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-        <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;color:var(--text3);text-transform:uppercase">つなぐ（共有事項）</div>
-        <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--active);font-weight:500">${flaggedVisits}件 / ${monthly.length}件</div>
+        <div style="font-family:DM Mono,monospace;font-size:10px;letter-spacing:0.1em;color:var(--text3);text-transform:uppercase">つなぐ（共有事項）</div>
+        <div style="font-family:DM Mono,monospace;font-size:11px;color:var(--active);font-weight:500">${flaggedVisits}件 / ${monthly.length}件</div>
       </div>
       ${FLAGS.map(f => {
         const count = flagCount[f.id];
         if (count === 0) return '';
-        return `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+        return `<div onclick="openFlagDetail('${f.id}')" style="display:flex;justify-content:space-between;align-items:center;padding:8px 4px;border-bottom:1px solid var(--border);cursor:pointer">
           <span style="font-size:13px;color:var(--text)">${f.label}</span>
-          <span style="font-family:'DM Mono',monospace;font-size:13px;color:var(--active);font-weight:500">${count}件</span>
+          <span style="display:flex;align-items:center;gap:6px">
+            <span style="font-family:DM Mono,monospace;font-size:13px;color:var(--active);font-weight:500">${count}件</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px;color:var(--text3)"><polyline points="9 18 15 12 9 6"/></svg>
+          </span>
         </div>`;
       }).join('')}
     </div>` : ''}
 
     <!-- 確認項目ランキング -->
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:2px;padding:16px;margin-bottom:10px">
-      <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;color:var(--text3);text-transform:uppercase;margin-bottom:14px">確認項目</div>
+      <div style="font-family:DM Mono,monospace;font-size:10px;letter-spacing:0.1em;color:var(--text3);text-transform:uppercase;margin-bottom:14px">確認項目</div>
       ${topItems.map(item => {
         const count = itemCount[item.id];
         const pct = maxItem > 0 ? Math.round(count / maxItem * 100) : 0;
         return `<div style="margin-bottom:12px">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
             <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:${count>0?'var(--text)':'var(--text3)'}"><span style="display:inline-flex;width:14px;height:14px;flex-shrink:0">${item.icon}</span>${item.label}</div>
-            <span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text2)">${count}件</span>
+            <span style="font-family:DM Mono,monospace;font-size:12px;color:var(--text2)">${count}件</span>
           </div>
           <div style="height:4px;background:var(--surface2);border-radius:2px">
             <div style="height:4px;background:${count>0?'var(--active)':'var(--border)'};border-radius:2px;width:${pct}%;transition:width 0.3s"></div>
@@ -1966,13 +3477,13 @@ function renderSummary() {
 
     <!-- 施設別訪問回数 -->
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:2px;padding:16px;margin-bottom:10px">
-      <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;color:var(--text3);text-transform:uppercase;margin-bottom:14px">施設別訪問回数</div>
+      <div style="font-family:DM Mono,monospace;font-size:10px;letter-spacing:0.1em;color:var(--text3);text-transform:uppercase;margin-bottom:14px">施設別訪問回数</div>
       ${facilityEntries.map(([name, count]) => {
         const pct = Math.round(count / maxFac * 100);
         return `<div style="margin-bottom:12px">
           <div style="display:flex;justify-content:space-between;margin-bottom:5px">
             <span style="font-size:13px;color:var(--text)">${name}</span>
-            <span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text2)">${count}回</span>
+            <span style="font-family:DM Mono,monospace;font-size:12px;color:var(--text2)">${count}回</span>
           </div>
           <div style="height:4px;background:var(--surface2);border-radius:2px">
             <div style="height:4px;background:var(--accent2);border-radius:2px;width:${pct}%"></div>
@@ -1984,11 +3495,11 @@ function renderSummary() {
     ${mainWorkEntries.length > 0 ? `
     <!-- 作業種別 -->
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:2px;padding:16px">
-      <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;color:var(--text3);text-transform:uppercase;margin-bottom:12px">作業種別</div>
+      <div style="font-family:DM Mono,monospace;font-size:10px;letter-spacing:0.1em;color:var(--text3);text-transform:uppercase;margin-bottom:12px">作業種別</div>
       ${mainWorkEntries.map(([work, count]) =>
         `<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">
           <span style="font-size:13px;color:var(--text)">${work}</span>
-          <span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text2)">${count}件</span>
+          <span style="font-family:DM Mono,monospace;font-size:12px;color:var(--text2)">${count}件</span>
         </div>`
       ).join('')}
     </div>` : ''}
@@ -2004,83 +3515,35 @@ function shiftMonth(dir) {
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  const tabMap = { 'screen-list': 'tab-list', 'screen-master': 'tab-master', 'screen-summary': 'tab-summary', 'screen-export': 'tab-export' };
+  const tabMap = { 'screen-list': 'tab-list', 'screen-master': 'tab-master', 'screen-summary': 'tab-summary', 'screen-export': 'tab-export', 'screen-progress': 'tab-progress' };
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
   if (tabMap[id]) document.getElementById(tabMap[id])?.classList.add('active');
   const hideNav = ['screen-form', 'screen-detail'].includes(id);
   document.querySelector('.header').style.display = hideNav ? 'none' : 'flex';
   document.querySelector('.header-nav').style.display = hideNav ? 'none' : 'flex';
-  if (id === 'screen-master') { renderMasterList(); renderWorkList(); renderExportStats(); }
+  if (id === 'screen-master') {
+    renderMasterList(); renderWorkList(); renderExportStats(); renderImportStats();
+    const repInput = document.getElementById('reporter-input');
+    if (repInput) repInput.value = reporterName;
+    const pbInput = document.getElementById('pb-email-input');
+    if (pbInput) pbInput.value = pbEmail;
+  }
+  if (id === 'screen-progress') { renderProgressScreen(); }
   if (id === 'screen-summary') renderSummary();
   if (id === 'screen-export') renderExportStats();
   window.scrollTo(0,0);
 }
 
-function goBack() { showScreen('screen-list'); }
+let detailReturnTo = null;
+function goBack() {
+  const target = detailReturnTo || 'screen-list';
+  detailReturnTo = null;
+  showScreen(target);
+}
 
-// ── スワイプでタブ切り替え ──
+// ── スワイプでタブ切り替え（無効化中） ──
 const TAB_ORDER = ['screen-list', 'screen-export', 'screen-summary', 'screen-master'];
-let touchStartX = 0;
-let touchStartY = 0;
-let touchStartTime = 0;
-let swipeBlocked = false;
-
-document.addEventListener('touchstart', (e) => {
-  swipeBlocked = false;
-  // フォーム・詳細画面ではスワイプ無効
-  const active = document.querySelector('.screen.active');
-  if (!active || ['screen-form', 'screen-detail'].includes(active.id)) {
-    swipeBlocked = true;
-    return;
-  }
-  // インタラクティブ要素上はスワイプ無効
-  if (e.target.closest('select, textarea, input, button, label, a, [contenteditable], .facility-group-body, .visit-card, .flag-chip, .item-row, .sort-opt, .nav-tab, .fab')) {
-    swipeBlocked = true;
-    return;
-  }
-  // 画面端は無視（iOSのスワイプバックと干渉）
-  const x = e.touches[0].clientX;
-  const w = window.innerWidth;
-  if (x < 30 || x > w - 30) {
-    swipeBlocked = true;
-    return;
-  }
-  touchStartX = x;
-  touchStartY = e.touches[0].clientY;
-  touchStartTime = Date.now();
-}, { passive: true });
-
-document.addEventListener('touchend', (e) => {
-  if (swipeBlocked || !touchStartX) { touchStartX = 0; return; }
-  const active = document.querySelector('.screen.active');
-  if (!active || ['screen-form', 'screen-detail'].includes(active.id)) { touchStartX = 0; return; }
-
-  const dx = e.changedTouches[0].clientX - touchStartX;
-  const dy = e.changedTouches[0].clientY - touchStartY;
-  const dt = Date.now() - touchStartTime;
-
-  const absDx = Math.abs(dx), absDy = Math.abs(dy);
-  // 判定をより厳しく:
-  // - 80px以上の横移動
-  // - 縦移動の2倍以上
-  // - 500ms以内
-  if (absDx < 80 || absDx < absDy * 2 || dt > 500) {
-    touchStartX = 0;
-    return;
-  }
-
-  const currentIdx = TAB_ORDER.indexOf(active.id);
-  if (currentIdx === -1) { touchStartX = 0; return; }
-
-  let nextIdx = currentIdx;
-  if (dx < 0) nextIdx = currentIdx + 1;
-  if (dx > 0) nextIdx = currentIdx - 1;
-
-  if (nextIdx >= 0 && nextIdx < TAB_ORDER.length && nextIdx !== currentIdx) {
-    showScreen(TAB_ORDER[nextIdx]);
-  }
-  touchStartX = 0;
-}, { passive: true });
+// スワイプは現在無効化されています
 
 function showToast(msg) {
   const t = document.getElementById('toast');
@@ -2089,11 +3552,13 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2000);
 }
 
-  document.getElementById('master-input').addEventListener('keydown', e => {
-    if (e.key === 'Enter') addFacility();
-  });
-  document.getElementById('work-input').addEventListener('keydown', e => {
-    if (e.key === 'Enter') addWork();
+  // サジェストの外側をタップしたら閉じる
+  document.addEventListener('click', e => {
+    [['facility-suggest','f-facility'],['reporter-suggest','f-reporter'],['contact-suggest','f-contact'],['work-suggest','f-main-work']].forEach(([boxId, inputId]) => {
+      const box = document.getElementById(boxId);
+      const input = document.getElementById(inputId);
+      if (box && input && !box.contains(e.target) && e.target !== input) box.style.display = 'none';
+    });
   });
   init();
 </script>
